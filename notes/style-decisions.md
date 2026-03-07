@@ -52,6 +52,14 @@
 - Ground abstract concepts in problems the reader has already experienced
 - When introducing a new idea, lead with the problem it solves, not the solution itself
 
+## Sentence Style
+
+- Prefer periods over em-dashes — break compound thoughts into separate sentences rather than bridging them with a dash
+- Split compound sentences at "and": "slow, and sometimes X" becomes "slow. Sometimes X"
+- Avoid trailing relative clauses ("one that...", "something that...") — repeat the noun and start a new sentence instead
+- Bridge continuations ("and then X", "and trust that") should become new sentences with an explicit subject
+- Cut redundant words aggressively; if context makes a word obvious, remove it
+
 ## Formatting
 
 - Semantic line breaks in markdown source
