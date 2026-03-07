@@ -51,3 +51,42 @@ This gap, between what a function's signature tells you
 and what the function actually does,
 turns out to be a fundamental problem.
 This problem shows up wherever programs get complex enough to matter.
+
+## What Is an Effect?
+
+The things that function was doing all have something in common.
+Reading configuration, writing to the audit log, fetching the exchange rate:
+none of them were part of computing a return value.
+They were interactions with the world outside the function.
+
+We have a word for those interactions: **effects**.
+
+An effect is anything a function does beyond computing its return value.
+When a function reads from a database, that is an effect.
+When it writes to a log, that is an effect.
+When it throws an exception, modifies a shared counter,
+or sends a request to another service, those are effects too.
+
+Consider a function that takes two numbers and returns their sum.
+It needs nothing from the world beyond its arguments.
+It leaves no trace.
+Call it a hundred times and get the same result each time.
+That function has no effects.
+
+Most useful functions are not like that.
+They need things from the world.
+They leave traces in the world.
+The concept of an effect draws a line between the two:
+computation on one side, interaction with the outside world on the other.
+
+That line matters because the two sides behave differently.
+You can reason about computation by reading code alone.
+To reason about effects, you need context:
+what environment the function runs in,
+what state the world is in when it executes,
+what might fail, what might change.
+
+When effects are invisible, when nothing in the code signals their presence,
+that context is hidden.
+That is the problem the previous section described.
+This is its name.
