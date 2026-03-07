@@ -59,3 +59,8 @@
 - No bullet-point lists in prose (write in paragraphs)
 - Code blocks should be short (under 15 lines where possible)
 - Section headings should be evocative, not descriptive ("The Hidden Life of Functions" not "Introduction to Side Effects")
+
+
+If unsure about Koka or ZIO syntax details, add a 
+<!-- VERIFY: description of uncertainty --> comment 
+in the markdown rather than guessing.
