@@ -97,3 +97,65 @@ The code reads sequentially.
 The effects are visible in the types.
 The handlers connect effects to implementations.
 Languages in this family include Koka, Eff, Effekt, Unison, and Flix.
+
+## Add-on Effect Systems
+
+Not every language with a thriving ecosystem could be rebuilt from scratch.
+Java, Scala, and Python had decades of libraries, tooling, and production code.
+Redesigning their type systems around effects was not an option.
+
+Library authors found a different path.
+Rather than asking the compiler to track effects natively,
+they used the existing type system to encode effect information into the types of values.
+The approach works, but it requires a shift in mechanism:
+instead of writing a computation and having the compiler observe its effects,
+you build a **description** of a computation and execute that description later.
+
+In ZIO, a widely-used Scala library, that description is a value of type `ZIO[R, E, A]`.
+The three type parameters carry the effect information:
+`R` is the environment the computation requires,
+`E` is the type of error it can produce,
+and `A` is the type of value it produces on success.
+
+```scala
+// A description of a computation that:
+// - requires no environment (Any)
+// - can fail with an exception (Throwable)
+// - produces an Int on success
+def safeDivide(x: Int, y: Int): ZIO[Any, Throwable, Int] =
+  ZIO.attempt(x / y)
+
+// Nothing has run. safeDivide returns a description, not a result.
+```
+
+You combine descriptions using for-comprehensions —
+Scala's syntax for chaining operations where each step can use the result of the previous one:
+
+```scala
+val program: ZIO[Any, Throwable, Unit] =
+  for
+    line <- ZIO.attempt(readLine())
+    _    <- ZIO.attempt(println(s"Hello, $line"))
+  yield ()
+```
+
+`program` is still a value.
+Nothing has run.
+
+Execution happens at a single boundary, the runtime entry point:
+
+```scala
+object Main extends ZIOAppDefault:
+  def run = program
+```
+
+Everything above `run` is description.
+`run` is where description becomes action.
+
+This boundary is not incidental. It is the mechanism.
+The compiler sees what effects a function might perform by looking at its return type,
+the same way it inspects any other type.
+But the effects are encoded in a library type, not tracked natively by the language.
+
+Libraries in this family include ZIO, Cats Effect, and Kyo in Scala,
+and polysemy and effectful in Haskell.
