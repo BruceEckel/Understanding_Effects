@@ -175,3 +175,31 @@ You cannot safely move a wall without knowing what runs through it.
 Programs have the same problem.
 Effects connect functions to the world and to each other.
 When those connections are untracked, every change is a guess.
+
+## The Central Tension
+
+You cannot write useful programs without effects.
+They are not incidental. They are the point.
+When a user clicks a button, something must happen.
+When data must persist, it must be written somewhere.
+When two services must coordinate, they must communicate.
+Remove all effects, and you have removed everything the program was built to do.
+
+The tension is not between effects and correctness.
+It is between effects and visibility.
+
+A program with explicit effects has the same power as one where effects are hidden.
+It can still read from databases, write to logs, throw exceptions, coordinate across threads.
+But the programmer working on it, the test suite validating it, and the compiler processing it
+all know what each function does.
+The wiring has a diagram.
+
+The question is whether a language can draw that diagram.
+Whether the mechanisms that make type errors visible at compile time
+can make effect errors visible too.
+Whether the compiler can tell you, before you run anything,
+that a function you expected to be effect-free is secretly reaching out to the network.
+Whether the things now only discoverable by reading every line
+can instead be right there, in the interface.
+
+This question is answered in the rest of this book.
