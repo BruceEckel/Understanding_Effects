@@ -90,3 +90,48 @@ When effects are invisible, when nothing in the code signals their presence,
 that context is hidden.
 That is the problem the previous section described.
 This is its name.
+
+## A Tour of Common Effects
+
+That definition covers a lot of ground.
+Effects come in distinct flavors, and most programs contain all of them.
+
+The most familiar is **state**: reading or modifying a value outside the function's own scope.
+A method that increments a counter on its object has a state effect.
+A function that reads from a global configuration object has a state effect.
+So does any function that mutates its arguments.
+State effects are the ones most often left implicit.
+The counter increments, the configuration gets read,
+and nothing in the function's signature mentions either.
+
+**I/O** covers interactions with the world beyond the program's own memory:
+writing to the console, reading from a file, sending a network request.
+These are slow compared to computation, they can fail for reasons outside your control,
+and they are often irreversible.
+You can reset a counter.
+You cannot un-send a request.
+
+**Exceptions** are effects too, though programmers rarely think of them as such.
+When a function throws, it does not return a value in the ordinary sense.
+It jumps to a catch block somewhere up the call stack, bypassing everything in between.
+The function's return type says nothing about this possibility.
+You can read a signature and have no idea whether calling that function
+might skip its caller entirely and surface twenty frames up.
+
+**Concurrency** enters when a function coordinates with computations running in parallel.
+Acquiring a lock, posting to a message queue, waiting for another task to complete:
+these are effects because they involve something outside the function's own thread of execution.
+A function that looks simple acquires a lock the caller already holds, and the program deadlocks.
+Nothing in the signature warned you.
+
+**Nondeterminism** is the subtlest kind.
+A nondeterministic function can return different results given identical inputs.
+Reading the current time, generating a random number, sampling from a sensor:
+call any of these twice and you may get two different answers.
+The function's behavior depends on the state of the world at the moment it runs,
+and that dependency is invisible from the outside.
+
+Each of these is different in character.
+But they share a common shape: something extra happens, beyond the return value.
+That something is what a programmer needs to track, test around, and reason about.
+And in most languages, nothing makes it visible.
