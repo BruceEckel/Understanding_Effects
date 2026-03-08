@@ -135,3 +135,43 @@ Each of these is different in character.
 But they share a common shape: something extra happens, beyond the return value.
 That something is what a programmer needs to track, test around, and reason about.
 And in most languages, nothing makes it visible.
+
+## Why Effects Matter
+
+Effects are not optional.
+Consider a program that only computes return values, touching nothing else,
+produces no output, stores nothing, communicates with no one.
+The effects are the work.
+
+The problem is not that effects exist.
+The problem is what happens when they are invisible.
+
+Consider what the invisible effects in that opening example cost.
+They made the test slow, because nothing indicated it needed a running service.
+They made tests interfere with each other, because nothing indicated they shared state.
+They required reading three levels of implementation to diagnose a simple failure.
+Every one of those costs came from the same source: the effects were hidden.
+
+That cost scales.
+In a small codebase, you can hold enough context in your head to stay ahead of it.
+In a large one, you cannot.
+A function you understand today gets called by a function written next week,
+which gets called by code a colleague writes next month.
+Each step adds invisible dependencies.
+No one has the full picture.
+
+The symptoms are familiar: tests that only fail when run together,
+bugs that reproduce in production but not in development,
+refactorings that break things they should never have touched.
+These are not random failures.
+They are the predictable result of effects flowing through a codebase
+with nothing to mark their path.
+
+Think of it as invisible wiring.
+A building needs wiring to function,
+but if it runs through the walls with no diagram,
+every renovation is a hazard.
+You cannot safely move a wall without knowing what runs through it.
+Programs have the same problem.
+Effects connect functions to the world and to each other.
+When those connections are untracked, every change is a guess.
