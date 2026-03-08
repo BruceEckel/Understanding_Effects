@@ -318,3 +318,54 @@ In an add-on system, the return type is the interface.
 what the function needs, what can go wrong, and what it produces on success.
 Designing those type parameters well is its own craft:
 specific enough to be informative, general enough not to overconstrain the caller.
+
+## Choosing Your Tradeoffs
+
+Both approaches solve the core problem.
+Both make effects visible. Both enforce handling.
+Both separate what a computation does from how it is fulfilled.
+The choice between them is not about correctness. It is about fit.
+
+Add-on systems like ZIO and Cats Effect carry years of production investment.
+Their runtimes handle concurrency, scheduling, and resource management
+at a level that took significant engineering to reach.
+Their ecosystems are large: libraries, documentation, community knowledge, tooling.
+Working in Scala or Haskell means access to effect systems
+that real teams have relied on in demanding production environments.
+The cost is the description/execution split and everything it brings.
+For teams fluent in the model, that cost is largely invisible.
+For teams new to it, the learning curve is real and front-loaded.
+
+Built-in systems offer a different proposition.
+The cognitive overhead is lower.
+Effects are part of the type system the way types have always been:
+declared, inferred, checked, with no extra model to carry.
+Code reads sequentially, effect information travels alongside,
+and the compiler catches mismatches at their source.
+The cost is maturity.
+Languages like Koka and Eff are younger, with smaller ecosystems
+and fewer battle-tested libraries.
+Choosing one today means the surrounding infrastructure
+is not yet what Scala's or Haskell's is.
+
+In practice, context decides more than principles do.
+A team already working in Scala is not choosing between effect systems in the abstract.
+It is choosing which library to adopt in an ecosystem that already exists,
+where the add-on model is the established path.
+A team with more flexibility might weigh built-in systems seriously,
+knowing that the conceptual overhead is lower
+even if the ecosystem is still maturing.
+
+Neither choice is permanent.
+The concepts transfer.
+A programmer who understands the perform-and-handle model
+can read ZIO code with comprehension.
+A programmer fluent in descriptions and layers
+can pick up a built-in system's effect rows without starting from zero.
+The vocabulary is shared even when the mechanisms differ.
+
+What you have now, after these three chapters,
+is that vocabulary and the map that goes with it.
+You know what effects are, why unmanaged effects cause the problems they do,
+and what both families of solution ask of you in return.
+That is enough to work in either system with your eyes open.
