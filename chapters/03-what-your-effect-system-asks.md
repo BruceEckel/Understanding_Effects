@@ -203,7 +203,14 @@ execution must be deferred.
 The description/execution split is the shape a library takes
 when it needs to manage effects from the outside.
 It is a byproduct.
-Many programmers come to value it for its own qualities.
+The description model does enable patterns that programmers come to value.
+Retry logic, timeouts, and guaranteed resource cleanup all require
+control over when an effect executes.
+A description can be retried. An effect that has already run cannot.
+Built-in systems reach the same goals through handlers.
+A retry handler can invoke its continuation multiple times.
+A timeout handler can abort before the deadline.
+The capabilities are real, and the path through descriptions is not the only one.
 But it is a byproduct.
 
 The cost is a conceptual layer the programmer must carry everywhere.

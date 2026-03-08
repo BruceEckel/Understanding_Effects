@@ -49,13 +49,18 @@ fun greet(name: string): <console> ()
   println("Hello, " ++ name)
 ```
 
-The angle brackets hold the **effect row** — the set of effects this function performs.
+The angle brackets hold the **effect row**: the set of effects this function performs.
 `add` has an empty effect row, so nothing appears there.
 `greet` performs console I/O, so `<console>` appears in its signature.
 
+Notice where that information lives: in the type, not the argument list.
+A caller sees what `greet` does without `greet` needing to accept the console as a parameter.
+The effect row is a dedicated channel for this information,
+separate from inputs and separate from the return value.
+
 Effect annotations propagate automatically.
 If a function calls `greet`, the compiler adds `console` to its own effect row.
-You do not have to declare your effects manually — the compiler infers them from what you call.
+The compiler infers them from what you call.
 You can annotate explicitly when you want to constrain what a function is allowed to do.
 
 Effects also need to be fulfilled somewhere.
