@@ -159,3 +159,72 @@ But the effects are encoded in a library type, not tracked natively by the langu
 
 Libraries in this family include ZIO, Cats Effect, and Kyo in Scala,
 and polysemy and effectful in Haskell.
+
+## Why the Split Exists
+
+The two families did not emerge from competing theories about the right way to manage effects.
+They emerged from different starting points.
+
+Languages like Koka and Eff were designed from scratch by researchers
+whose central goal was exploring what a language built around effects could look like.
+With no existing codebase to preserve and no compatibility constraints to honor,
+they could put effects into the type system at the foundation.
+Everything else in the language was built around that choice.
+
+Scala arrived at its approach by a different route.
+It had years of production use, a large library ecosystem, and deep interoperability with Java.
+Redesigning the language's type system from scratch was not possible.
+But Scala's type system was expressive enough that library authors could encode effect information
+into types without any compiler changes.
+ZIO and Cats Effect are the result: full-featured effect systems built entirely as libraries,
+working within the language as it already existed.
+
+The constraint shaped the mechanism.
+The description/execution split is a natural consequence of encoding effects into values
+in a language that was not designed for them.
+To track whether a function is effectful, the type must carry that information.
+To make that type meaningful, execution must be deferred to a boundary the library controls.
+That is what makes the mechanism work.
+
+Neither starting point was wrong.
+A language designed around effects from the ground up can offer things a library cannot.
+It can provide tighter compiler integration, cleaner error messages,
+and syntax that feels native rather than adapted.
+A library built on top of an established language brings something different:
+the entire ecosystem of that language, its tooling, its community,
+and years of production experience.
+Choosing between them is not a matter of correctness.
+It is a matter of context.
+
+## What They Share
+
+The two families look different from the outside and work differently on the inside.
+But they share something worth naming before moving on.
+
+Both make effects visible.
+In a built-in system, the effect row in a function's signature tells you what that function does.
+In an add-on system, the type parameters of the description type tell you the same thing.
+The mechanism is different.
+The result is the same: effects you can see without reading the body.
+
+Both separate the declaration of effects from their implementation.
+In Koka, a function declares a `<fail>` effect without deciding what failure means.
+A handler somewhere up the call stack makes that decision.
+In ZIO, a function returns a `ZIO[R, E, A]` without deciding what environment it runs in
+or how its errors are resolved.
+The caller provides that through configuration.
+Neither the function nor the description owns the implementation of its own effects.
+
+Both let the compiler or runtime enforce effect discipline.
+In a built-in system, the compiler rejects code that uses an unhandled effect.
+In an add-on system, the type system rejects code that runs a description
+with unsatisfied dependencies or unresolved error types.
+The enforcement looks different, but the principle is the same:
+you cannot ignore effects. The language, or the library, makes you account for them.
+
+These three properties are what distinguish an effect system, of either kind,
+from the invisible effects of Chapter 1.
+The question is no longer whether effects exist.
+It is how they are declared, who handles them, and what happens when you fail to account for them.
+
+The next chapter looks at what living with those answers actually feels like.
