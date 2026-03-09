@@ -22,8 +22,8 @@ See `notes/outline.md` for the detailed chapter outline.
 - Delayed execution is framed as an **artifact** of the add-on approach, not intrinsic to effect management
 - Avoid the word "monad" — show the shape of add-on systems without naming the underlying abstraction
 - Chapter 1 has no code — purely conceptual, grounded in problems the reader already feels
-- Built-in examples use **Koka** syntax (purpose-built around effects, clean and readable)
-- Add-on examples use **Scala/ZIO** real syntax, showing the pattern without naming monads
+- Built-in examples use **Koka** and **Flix** syntax (both purpose-built around effects, different notations)
+- Add-on examples use **Scala/ZIO** and **Effect.ts** real syntax, showing the pattern without naming monads
 - Chapter 1 must establish why mainstream programmers should care, in terms they already feel — not "effects are a formal concept" but "you've been bitten by this problem"
 
 ## Writing Style

@@ -101,6 +101,37 @@ where failure has no handler — the compiler catches that before you run anythi
 The code reads sequentially.
 The effects are visible in the types.
 The handlers connect effects to implementations.
+
+Flix takes the same approach with different notation.
+Effects appear after a backslash in function signatures
+rather than in angle brackets,
+but the information occupies the same position:
+what the function returns, and what it does beyond that.
+
+```flix
+// No effects: signature shows only the return type
+def add(x: Int32, y: Int32): Int32 = x + y
+
+// IO effect declared after the backslash
+def greet(name: String): Unit \ IO =
+    println("Hello, ${name}")
+
+// A custom effect and a function that uses it
+eff Fail {
+    def fail(msg: String): a
+}
+
+def safeDivide(x: Int32, y: Int32): Int32 \ Fail =
+    if (y == 0) do Fail.fail("division by zero")
+    else x / y
+```
+
+<!-- VERIFY: Flix backslash effect set notation, eff/def declaration syntax inside eff block, do keyword for performing effects, IO effect name -->
+
+Angle brackets or backslash, the discipline is the same:
+effects in the signature, inferred by the compiler,
+required to be handled before execution proceeds.
+
 Languages in this family include Koka, Eff, Effekt, Unison, and Flix.
 
 ## Add-on Effect Systems
@@ -162,8 +193,45 @@ The compiler sees what effects a function might perform by looking at its return
 the same way it inspects any other type.
 But the effects are encoded in a library type, not tracked natively by the language.
 
-Libraries in this family include ZIO, Cats Effect, and Kyo in Scala,
-and polysemy and effectful in Haskell.
+Effect, a TypeScript library, uses the same approach.
+Its description type is `Effect<Success, Error, Requirements>` —
+the type parameters carry effect information in the same three roles,
+with different names.
+
+```typescript
+// A description that can fail with Error, requires no environment
+const safeDivide = (x: number, y: number): Effect.Effect<number, Error> =>
+  y === 0
+    ? Effect.fail(new Error("division by zero"))
+    : Effect.succeed(x / y)
+
+// Nothing has run. safeDivide returns a description, not a result.
+```
+
+Descriptions compose using generator syntax:
+
+```typescript
+const greet: Effect.Effect<void> = Effect.gen(function* () {
+  const line = yield* Effect.sync(() => readLineSync())
+  yield* Effect.sync(() => console.log(`Hello, ${line}`))
+})
+```
+
+`greet` is still a value. Nothing has run.
+
+Execution happens at the boundary:
+
+```typescript
+Effect.runSync(greet)
+```
+
+<!-- VERIFY: Effect.ts type parameter order (Effect<A, E, R>), generator yield* syntax, Effect.sync for wrapping synchronous side effects, runSync vs runPromise -->
+
+The description/execution split works identically in TypeScript.
+The library controls execution; everything above the boundary is description.
+
+Libraries in this family include ZIO, Cats Effect, and Kyo in Scala;
+polysemy and effectful in Haskell; and Effect in TypeScript.
 
 ## Why the Split Exists
 

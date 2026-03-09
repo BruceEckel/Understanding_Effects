@@ -118,6 +118,30 @@ No effect reaches the runtime unaccounted for.
 The model will feel familiar if you already know exceptions.
 The built-in system is that same idea, generalized to every kind of effect.
 
+Flix uses the same perform-and-handle model with different syntax.
+You still perform effects by calling operations.
+You still install handlers to give those operations their meaning.
+The handler wraps the computation using `run ... with`:
+
+```flix
+// Handle failure by returning a default value
+def withDefault(default: Int32, f: Unit -> Int32 \ Fail): Int32 =
+    run f() with Fail {
+        def fail(_msg) = default
+    }
+
+// Handle console output by discarding it
+def silently(f: Unit -> a \ Console): a =
+    run f() with Console {
+        def println(_msg) = ()
+    }
+```
+
+<!-- VERIFY: Flix handler syntax (run ... with EffName { def op(...) = ... }), Unit -> a \ Eff function type syntax, Console effect name and println operation -->
+
+`run ... with` is Flix's handler construct where Koka uses `with handler`.
+The names differ; the structure does not.
+
 ## The Add-on Experience
 
 The add-on mental model has one foundational rule, and everything follows from it:
@@ -179,6 +203,33 @@ The system works when you commit to the model.
 Once you do, the return type of every function tells you
 whether it is a pure description, what effects it might perform,
 and what it requires from the environment to run.
+
+Effect brings the same mental model to TypeScript.
+The type is `Effect.Effect<Success, Error, Requirements>`,
+and generator syntax sequences descriptions the same way for-comprehensions do in Scala.
+
+```typescript
+const greet: Effect.Effect<void> = Effect.gen(function* () {
+  const line = yield* Effect.sync(() => readLineSync())
+  yield* Effect.sync(() => console.log(`Hello, ${line}`))
+})
+
+const safe: Effect.Effect<string, never> =
+  Effect.sync(() => readLineSync()).pipe(
+    Effect.map((s) => s.trim()),
+    Effect.catchAll(() => Effect.succeed("(no input)"))
+  )
+
+// The execution boundary
+Effect.runSync(greet)
+```
+
+<!-- VERIFY: Effect.ts generator yield* syntax, Effect.sync for synchronous side effects, .pipe chaining with catchAll, Effect<A, never> when error is eliminated, runSync -->
+
+The error type changes from `Error` to `never` when `catchAll` eliminates the failure case —
+the same signal ZIO gives with `Nothing`.
+`greet` is a value; `Effect.runSync` is where it becomes action.
+The discipline is the same: descriptions compose, the boundary executes.
 
 ## Delayed Execution: An Artifact, Not a Feature
 
@@ -261,7 +312,7 @@ A function that runs under a real-database handler in production
 runs under an in-memory handler in tests.
 The function's code does not change.
 
-In ZIO, you swap the layer.
+In an add-on system, you swap the layer.
 A function that requires a database service through its `R` parameter
 receives a real implementation in production and a test implementation in tests.
 
@@ -273,6 +324,16 @@ with real-database-handler { run-query(params) }
 with in-memory-handler { run-query(params) }
 ```
 
+```flix
+// Production
+run runQuery(params) with realDatabaseHandler
+
+// Test: substitute without changing runQuery
+run runQuery(params) with inMemoryHandler
+```
+
+<!-- VERIFY: Koka handler-as-argument syntax; Flix run...with syntax for named handler values -->
+
 ```scala
 // Production
 runQuery(params).provide(DatabaseLive.layer)
@@ -281,9 +342,17 @@ runQuery(params).provide(DatabaseLive.layer)
 runQuery(params).provide(DatabaseTest.layer)
 ```
 
-<!-- VERIFY: Koka handler-as-argument syntax for these examples -->
+```typescript
+// Production
+Effect.runSync(runQuery(params).pipe(Effect.provide(DatabaseLive)))
 
-The structure is parallel: the computation declares what it needs,
+// Test: substitute without changing runQuery
+Effect.runSync(runQuery(params).pipe(Effect.provide(DatabaseTest)))
+```
+
+<!-- VERIFY: Effect.ts Effect.provide syntax, pipe placement relative to runSync -->
+
+The structure is parallel across all four: the computation declares what it needs,
 and the caller decides how to fulfill it.
 Neither approach requires the computation itself to change.
 
@@ -333,11 +402,11 @@ Both make effects visible. Both enforce handling.
 Both separate what a computation does from how it is fulfilled.
 The choice between them is not about correctness. It is about fit.
 
-Add-on systems like ZIO and Cats Effect carry years of production investment.
+Add-on systems like ZIO, Cats Effect, and Effect carry years of production investment.
 Their runtimes handle concurrency, scheduling, and resource management
 at a level that took significant engineering to reach.
 Their ecosystems are large: libraries, documentation, community knowledge, tooling.
-Working in Scala or Haskell means access to effect systems
+Working in Scala or TypeScript with an add-on system means access to effect management
 that real teams have relied on in demanding production environments.
 The cost is the description/execution split and everything it brings.
 For teams fluent in the model, that cost is largely invisible.
@@ -350,13 +419,13 @@ declared, inferred, checked, with no extra model to carry.
 Code reads sequentially, effect information travels alongside,
 and the compiler catches mismatches at their source.
 The cost is maturity.
-Languages like Koka and Eff are younger, with smaller ecosystems
+Languages like Koka and Flix are younger, with smaller ecosystems
 and fewer battle-tested libraries.
 Choosing one today means the surrounding infrastructure
-is not yet what Scala's or Haskell's is.
+is not yet what Scala's or TypeScript's is.
 
 In practice, context decides more than principles do.
-A team already working in Scala is not choosing between effect systems in the abstract.
+A team already working in Scala or TypeScript is not choosing between effect systems in the abstract.
 It is choosing which library to adopt in an ecosystem that already exists,
 where the add-on model is the established path.
 A team with more flexibility might weigh built-in systems seriously,
@@ -366,7 +435,7 @@ even if the ecosystem is still maturing.
 Neither choice is permanent.
 The concepts transfer.
 A programmer who understands the perform-and-handle model
-can read ZIO code with comprehension.
+can read ZIO or Effect code with comprehension.
 A programmer fluent in descriptions and layers
 can pick up a built-in system's effect rows without starting from zero.
 The vocabulary is shared even when the mechanisms differ.

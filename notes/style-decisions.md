@@ -27,20 +27,20 @@
 - Use plain-language descriptions and familiar analogies
 
 ### Chapter 2 — Built-in Examples
-- Use **Koka** syntax
+- Use **Koka** as primary, **Flix** as secondary (same concept, different notation)
 - Keep examples short and focused on one concept each
 - Annotate with comments explaining what the effect annotations mean
 - Show the progression: function without effects → function with declared effects → handler
 
 ### Chapter 2 — Add-on Examples
-- Use **Scala with ZIO** syntax
+- Use **Scala with ZIO** as primary, **TypeScript with Effect** as secondary
 - Show the shape of the code without explaining the monadic machinery
-- Focus on what the programmer sees: for-comprehensions, the ZIO type signature, the runtime boundary
+- Focus on what the programmer sees: for-comprehensions/generators, the description type signature, the runtime boundary
 - Let the reader notice the description/execution split without being lectured about it
 
 ### Chapter 3
-- Use both Koka and Scala/ZIO, side by side where the contrast matters
-- Keep examples parallel: same problem solved both ways
+- Use Koka and Flix for built-in, Scala/ZIO and Effect.ts for add-on
+- Side by side where the contrast matters; keep examples parallel
 
 ## Tone
 
