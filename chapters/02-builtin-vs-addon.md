@@ -1,9 +1,7 @@
 # Effect Systems: Built-in vs Add-on
 
-## Two Paths to the Same Problem
-
-Languages have been grappling with the effect visibility problem for decades,
-and they have not all arrived at the same answer.
+Languages have been grappling with effect visibility for decades,
+and they have not arrived at the same answer.
 Some languages were designed from the start with effects as a first-class concern.
 Others found effect management as a later need,
 addressed by libraries that work within the constraints of existing language designs.
@@ -14,14 +12,13 @@ Effect information lives in type signatures, tracked by the compiler.
 Programs written in the second family work differently:
 you construct descriptions of what a program should do, then execute those descriptions.
 
-The difference is not philosophical.
-It did not arise because one school of thought was right and another wrong.
+The difference did not arise because one school of thought was right and another wrong.
 It arose from the history of specific languages and their communities:
 what problems they were designed to solve,
 when they were designed,
 and what constraints they had to work within.
 
-This chapter looks at both families and where the difference comes from.
+This chapter looks at both families and the origin of the difference.
 
 ## Built-in Effect Systems
 
@@ -53,7 +50,21 @@ The angle brackets hold the **effect row**: the set of effects this function per
 `add` has an empty effect row, so nothing appears there.
 `greet` performs console I/O, so `<console>` appears in its signature.
 
-Notice where that information lives: in the type, not the argument list.
+Here is the same example in Flix:
+
+```flix
+// No effects: signature shows only the return type
+def add(x: Int32, y: Int32): Int32 = x + y
+
+// The backslash begins the effect row
+def greet(name: String): Unit \ IO =
+    println("Hello, ${name}")
+```
+
+Effects appear after a backslash in function signatures
+rather than in angle brackets.
+
+Notice the Effect information lives in the type.
 A caller sees what `greet` does without `greet` needing to accept the console as a parameter.
 The effect row is a dedicated channel for this information,
 separate from inputs and separate from the return value.
@@ -102,19 +113,9 @@ The code reads sequentially.
 The effects are visible in the types.
 The handlers connect effects to implementations.
 
-Flix takes the same approach with different notation.
-Effects appear after a backslash in function signatures
-rather than in angle brackets,
-but the information occupies the same position:
-what the function returns, and what it does beyond that.
 
 ```flix
-// No effects: signature shows only the return type
-def add(x: Int32, y: Int32): Int32 = x + y
 
-// IO effect declared after the backslash
-def greet(name: String): Unit \ IO =
-    println("Hello, ${name}")
 
 // A custom effect and a function that uses it
 eff Fail {
@@ -272,9 +273,7 @@ It is a matter of context.
 ## What They Share
 
 The two families look different from the outside and work differently on the inside.
-But they share something worth naming before moving on.
-
-Both make effects visible.
+But both make effects visible.
 In a built-in system, the effect row in a function's signature tells you what that function does.
 In an add-on system, the type parameters of the description type tell you the same thing.
 The mechanism is different.

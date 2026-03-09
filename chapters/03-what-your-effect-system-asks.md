@@ -1,15 +1,8 @@
 # What Your Effect System Asks of You
 
-## No Free Lunch
-
 Making effects visible is not free.
 
 You gain something real.
-The problems from Chapter 1 become detectable.
-The invisible wiring gets a diagram.
-The compiler or runtime catches effect mismatches
-before they become runtime surprises.
-
 But you pay in changed ways of working.
 Functions need effect declarations,
 or return types that carry effect information.
@@ -34,7 +27,7 @@ how you sequence operations, how you handle errors,
 how you test, how you read code written by others.
 
 Neither of these is free.
-Neither is the same cost.
+Neither has the same cost.
 
 Understanding what each approach asks of you
 is what lets you choose between them,
@@ -233,18 +226,12 @@ The discipline is the same: descriptions compose, the boundary executes.
 
 ## Delayed Execution: An Artifact, Not a Feature
 
-After working through both experiences, a question becomes available:
+After working through both approaches, a question arises:
 is the description/execution split essential to effect management?
 
 The answer is no.
 
-Built-in systems achieve everything add-on systems achieve:
-effects visible in types, effects that must be handled, code that cannot ignore effects.
-They achieve this without delayed execution.
-You write a call to `fail` and it looks like a function call.
-The compiler tracks the effect.
-Nothing is deferred.
-
+Built-in systems achieve everything without delayed execution.
 Delayed execution exists in add-on systems because of how those systems are built,
 not because effect management requires it.
 To make effects visible in a language not designed for them,
@@ -253,7 +240,7 @@ For that encoding to mean something, for the library to control how effects are 
 execution must be deferred.
 The description/execution split is the shape a library takes
 when it needs to manage effects from the outside.
-It is a byproduct.
+It is an artifact.
 The description model does enable patterns that programmers come to value.
 Retry logic, timeouts, and guaranteed resource cleanup all require
 control over when an effect executes.
@@ -262,7 +249,7 @@ Built-in systems reach the same goals through handlers.
 A retry handler can invoke its continuation multiple times.
 A timeout handler can abort before the deadline.
 The capabilities are real, and the path through descriptions is not the only one.
-But it is a byproduct.
+But it is an artifact.
 
 The cost is a conceptual layer the programmer must carry everywhere.
 You must always know whether a value is a description or an action.
@@ -279,10 +266,6 @@ because it is the natural way to manage effects.
 You are accepting it as the cost of a library-based solution
 in a language not built for effects from the start.
 
-That is a legitimate choice.
-Many teams make it deliberately, with full awareness of what it costs.
-What matters is making it with clear eyes.
-
 ## Living with Each Approach
 
 Effect systems change how code feels to work with day to day.
@@ -291,10 +274,10 @@ and they run in different directions depending on which family you are using.
 
 **Composability.**
 In a built-in system, effects compose automatically.
-A function that calls both a failing operation and a logging operation
+A function that calls a failing operation and a logging operation
 accumulates both effects in its row.
 There is nothing to declare beyond what the compiler already infers.
-Two functions with different effects can be called together;
+Two functions with different effects can be called together, and
 the combined row is their union.
 
 In an add-on system, composition is managed explicitly through the type parameters.
@@ -397,33 +380,6 @@ specific enough to be informative, general enough not to overconstrain the calle
 
 ## Choosing Your Tradeoffs
 
-Both approaches solve the core problem.
-Both make effects visible. Both enforce handling.
-Both separate what a computation does from how it is fulfilled.
-The choice between them is not about correctness. It is about fit.
-
-Add-on systems like ZIO, Cats Effect, and Effect carry years of production investment.
-Their runtimes handle concurrency, scheduling, and resource management
-at a level that took significant engineering to reach.
-Their ecosystems are large: libraries, documentation, community knowledge, tooling.
-Working in Scala or TypeScript with an add-on system means access to effect management
-that real teams have relied on in demanding production environments.
-The cost is the description/execution split and everything it brings.
-For teams fluent in the model, that cost is largely invisible.
-For teams new to it, the learning curve is real and front-loaded.
-
-Built-in systems offer a different proposition.
-The cognitive overhead is lower.
-Effects are part of the type system the way types have always been:
-declared, inferred, checked, with no extra model to carry.
-Code reads sequentially, effect information travels alongside,
-and the compiler catches mismatches at their source.
-The cost is maturity.
-Languages like Koka and Flix are younger, with smaller ecosystems
-and fewer battle-tested libraries.
-Choosing one today means the surrounding infrastructure
-is not yet what Scala's or TypeScript's is.
-
 In practice, context decides more than principles do.
 A team already working in Scala or TypeScript is not choosing between effect systems in the abstract.
 It is choosing which library to adopt in an ecosystem that already exists,
@@ -432,7 +388,6 @@ A team with more flexibility might weigh built-in systems seriously,
 knowing that the conceptual overhead is lower
 even if the ecosystem is still maturing.
 
-Neither choice is permanent.
 The concepts transfer.
 A programmer who understands the perform-and-handle model
 can read ZIO or Effect code with comprehension.
@@ -440,8 +395,4 @@ A programmer fluent in descriptions and layers
 can pick up a built-in system's effect rows without starting from zero.
 The vocabulary is shared even when the mechanisms differ.
 
-What you have now, after these three chapters,
-is that vocabulary and the map that goes with it.
-You know what effects are, why unmanaged effects cause the problems they do,
-and what both families of solution ask of you in return.
-That is enough to work in either system with your eyes open.
+The remainder of the book uses <specific language>.
