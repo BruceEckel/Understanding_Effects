@@ -243,13 +243,15 @@ The problem is not that effects exist.
 The problem is what happens when they are invisible.
 
 On the first page of this chapter, we considered a test that failed intermittently.
-Look at the cost of the invisible effects.
-They made the test slow, because nothing indicated it needed a running service.
-They made tests interfere with each other, because nothing indicated they shared state.
-They required reading three levels of implementation to diagnose a simple failure.
+Look at the cost of the invisible effects:
+
+- They made the test slow, because nothing indicated it needed a running service.
+- They made tests interfere with each other, because nothing indicated they shared state.
+- They required reading three levels of implementation to diagnose a simple failure.
+
 Every one of those costs came from the same source: the effects were hidden.
 
-That cost amplifies..
+That cost amplifies.
 In a small codebase, you can hold enough context in your head to stay ahead of it.
 In a large one, you cannot.
 A function you understand today gets called by a function written next week,
