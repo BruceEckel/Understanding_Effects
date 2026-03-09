@@ -280,7 +280,7 @@ The challenge is making the compiler tell you, before you run anything,
 that a function you expected to be effect-free is secretly reaching out to the network.
 Now things formerly discoverable only by reading every line can instead be right there, in the type-checked interface.
 
-# When Effect Systems Make Sense
+## When Effect Systems Make Sense
 
 If you’ve never worked with a large, complex system, the concepts in this book might not seem relevant to you.
 It is not possible to make a case for an Effect System using trivial examples that demonstrate individual language features.
