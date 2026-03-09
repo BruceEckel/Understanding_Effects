@@ -52,7 +52,8 @@ This problem shows up wherever programs get complex enough to matter.
 
 ## The Leaky Abstraction
 
-Let's create a function that moves us in a direction at a velocity. Here's a logical approach:
+Let's create a function that moves us in a direction at a velocity. 
+When calling `travel`, we provide direction and velocity:
 
 ```
 def travel(d: Direction, v: Velocity): Distance = {  
@@ -60,7 +61,8 @@ def travel(d: Direction, v: Velocity): Distance = {
 }
 ```
 
-When we call `travel` we decide what direction and velocity we want to use. But to implement this function we'll need some kind of motive force. Suppose there is an `engine` library:
+To implement this function we'll need some kind of motive force. 
+Suppose there is an `engine` library:
 
 ```
 import engine
@@ -72,9 +74,10 @@ def travel(d: Direction, v: Velocity): Distance = {
 }
 ```
 
-We construct code by using libraries. This is a powerful approach and it has gotten us far. 
+We constructed the implementation by using libraries. 
+This is a powerful approach and it has gotten us far. 
 
-There's a big problem when using libraries. 
+There's a big problem when using libraries: 
 This abstraction assumes there will be no repercussions from using `engine`, 
 that it's just a magical black box we don't have to think about. 
 If that happens to be true for a library, there's nothing to worry about.
@@ -89,7 +92,7 @@ Treating it as a pure black box with no side effects is probably asking for trou
 It's a leaky abstraction, and you must compensate using careful and tedious coding. 
 Without a type system to handle the bookkeeping and ensure nothing slips through, 
 you can only keep track of what you can hold in your head. 
-This challenge has limited the scale of systems since we began building them.
+This challenge has limited the scale of large systems since we began building them.
 
 The main problem is that we sneak `engine` into `travel`. 
 The function signature for `travel` doesn't show that we use the problematic `engine` in the implementation.
@@ -105,13 +108,25 @@ def travel(d: Direction, v: Velocity, e: engine): Distance = {
 }
 ```
 
-Now it's clear that `travel` uses an `engine`, and we have the added bonus that the particular implementation of `engine` can be determined at the function call site
+Now it's clear that `travel` uses an `engine`, 
+and we have the added bonus that the particular implementation of `engine` can be determined at the function call site.
 
-Doing this for every library gets tedious fast. It appears there are function arguments that we want to vary regularly, and those that might be set up at the beginning and never change. Default arguments don't help here because there must always *be* a default. There might be a default `engine` but in the general case you want something customized for your needs.
+Doing this for every library gets tedious fast. 
+It appears there are function arguments that we vary regularly, 
+and others that might be configured at program inception and never change. 
+Default arguments don't help here because there must always *be* a default. 
+There might be a default `engine` but in the general case you need something customized for your needs.
 
-We can use dependency injection to initialize the `engine`–along with any other libraries we use–thus removing the need to provide them at the call site. But this complicates the ability of the dependency injector to know that `travel` uses `engine`, so it falls back on the programmer. And if `engine` itself requires other libraries, the dependency injector must discover those and provide them for `engine` before providing `engine` to `travel`. Without somehow capturing that information in the type system, the dependency injector eventually succumbs to scaling problems.
+We can use dependency injection to initialize the `engine`, along with any other libraries we use.
+This removes the need to provide the injected elements at the call site. 
+However, dependency injection requires the dependency injector to know that `travel` uses `engine`, 
+so this bookkeeping falls back on the programmer. 
+If `engine` itself requires other libraries, 
+the dependency injector must include those and provide them for `engine` before providing `engine` to `travel`. 
+Without somehow capturing that information in the type system, the dependency injector eventually succumbs to scaling problems.
 
-What if we create an additional channel to convey this information? This way, we can separate the information we typically want to provide at every function call (direction and velocity) from the information that normally stays the same across function calls. We still have the option to change the latter information between function calls but we don't have to trip over it every time we call the function. It can be expressed like this:
+What if we create an additional channel to convey this information? This way, we can separate the information we typically provide at every function call (direction and velocity) from the information that normally stays the same across function calls. We still have the option to change the latter information from one function call to another, but we don't trip over it every time we call the function. 
+It can be expressed like this:
 
 ```
 def travel(d: Direction, v: Velocity): Distance \ engine = {  
@@ -127,7 +142,7 @@ Now `engine` is part of the type signature without encumbering the argument list
 * The compiler ensures `engine` appears in the type signature.   
 * If another function uses `travel`, it too must indicate in its type signature that `engine` is being used.  
 * When a dependency injector needs to know what `travel` uses, it can see it in the signature.   
-* If the system changes the implementation of `engine`, we immediately know what functions are affected. 
+* If the implementation of `engine` changes, we immediately know what functions are affected. 
 
 The fact that `engine` has an impact on the system is now visible to the compiler, and ensured through type checking. Using this second channel, we provide that information without mucking up the argument list.
 
@@ -149,7 +164,7 @@ Consider a function that takes two numbers and returns their sum.
 It needs nothing from the world beyond its arguments.
 It leaves no trace.
 Call it a hundred times and get the same result each time.
-That function has no effects.
+That function has no effects -- it is "pure".
 
 Many functions are not like that.
 They need things from the world.
@@ -170,15 +185,16 @@ When effects are invisible, when nothing in the code signals their presence,
 that context is hidden.
 This means you must keep track of effects yourself.
 You must discover and understand the effects of your code by reading its documentation, testing it, and observing its behavior.
-Because we can't always trust documentation (it may be outdated, incomplete, or wrong), you must be ready to read the source code of the functions you call.
+Because we can't always trust documentation (it may be outdated, incomplete, or wrong), 
+you must be ready to read the source code of the functions you call.
 
 When programs are small, these are relatively manageable activites.
 As systems scale, these activities become increasingly challenging.
 A large portion of programming activity is consumed through managing effects by hand.
 
-## A Taxonomy of Common Effects
+## Common Effects
 
-The most familiar Effect is `state`: reading or modifying a value outside the function's own scope.
+The most familiar Effect is **state**: reading or modifying a value outside the function's own scope.
 A method that increments a counter on its object has a state effect.
 A function that reads from a global configuration object has a state effect.
 So does any function that mutates its arguments.
@@ -186,55 +202,54 @@ State effects are the ones most often left implicit.
 The counter increments, the configuration gets read,
 and nothing in the function's signature mentions either.
 
-`I/O` covers interactions with the world beyond the program's own memory:
+**I/O** covers interactions with the world beyond the program's own memory:
 writing to the console, reading from a file, sending a network request.
 These are slow compared to computation, they can fail for reasons outside your control,
 and they are often irreversible.
 You can reset a counter.
 You cannot un-send a request.
 
-`Exceptions` are effects too, though programmers rarely think of them as such.
+**Exceptions** are not expressed in the type signature of the function.[^1]
 When a function throws, it does not return a value in the ordinary sense.
-It jumps to a catch block somewhere up the call stack, bypassing everything in between.
+It jumps to a catch block somewhere up the call stack, 
+bypassing everything in between and destroying any partial computations.
 The function's return type says nothing about this possibility.
 You can read a signature and have no idea whether calling that function
 might skip its caller entirely and surface twenty frames up.
+This is a significant impact which is why exceptions are Effects.
 
-`Concurrency` enters when a function coordinates with computations running in parallel.
+**Concurrency** is an Effect because functions must coordinate with computations running in parallel.
 Acquiring a lock, posting to a message queue, waiting for another task to complete:
 these are effects because they involve something outside the function's own thread of execution.
 A function that looks simple acquires a lock the caller already holds, and the program deadlocks.
 Nothing in the signature warned you.
 
-`Nondeterminism` is the subtlest kind.
+**Nondeterminism** is the subtle one.
 A nondeterministic function can return different results given identical inputs.
 Reading the current time, generating a random number, sampling from a sensor:
 call any of these twice and you may get two different answers.
 The function's behavior depends on the state of the world at the moment it runs,
 and that dependency is invisible from the outside.
+In particular, this makes testing difficult.
 
-Each of these is different in character.
-But they share a common shape: something extra happens, beyond the return value.
+Each type of Effect has different characteristics,
+but they share a common shape: something extra happens, beyond the return value.
 That something is what a programmer needs to track, test around, and reason about.
 And in most languages, nothing makes it visible.
 
-## Why Effects Matter
-
-Effects are not optional.
-Consider a program that only computes return values, touching nothing else,
-produces no output, stores nothing, communicates with no one.
-The effects are the work.
+## Effects Are Not Optional
 
 The problem is not that effects exist.
 The problem is what happens when they are invisible.
 
-Consider what the invisible effects in that opening example cost.
+On the first page of this chapter, we considered a test that failed intermittently.
+Look at the cost of the invisible effects.
 They made the test slow, because nothing indicated it needed a running service.
 They made tests interfere with each other, because nothing indicated they shared state.
 They required reading three levels of implementation to diagnose a simple failure.
 Every one of those costs came from the same source: the effects were hidden.
 
-That cost scales.
+That cost amplifies..
 In a small codebase, you can hold enough context in your head to stay ahead of it.
 In a large one, you cannot.
 A function you understand today gets called by a function written next week,
@@ -242,46 +257,28 @@ which gets called by code a colleague writes next month.
 Each step adds invisible dependencies.
 No one has the full picture.
 
-The symptoms are familiar: tests that only fail when run together,
-bugs that reproduce in production but not in development,
-refactorings that break things they should never have touched.
 These are not random failures.
 They are the predictable result of effects flowing through a codebase
 with nothing to mark their path.
-
-Think of it as invisible wiring.
-A building needs wiring to function,
-but if it runs through the walls with no diagram,
-every renovation is a hazard.
-You cannot safely move a wall without knowing what runs through it.
-Programs have the same problem.
 Effects connect functions to the world and to each other.
 When those connections are untracked, every change is a guess.
 
-## The Central Tension
+## You Must Manage Effects
 
 You cannot write useful programs without effects.
-They are not incidental. They are the point.
 When a user clicks a button, something must happen.
 When data must persist, it must be written somewhere.
 When two services must coordinate, they must communicate.
 Remove all effects, and you have removed everything the program was built to do.
 
-The tension is not between effects and correctness.
-It is between effects and visibility.
-
-A program with explicit effects has the same power as one where effects are hidden.
-It can still read from databases, write to logs, throw exceptions, coordinate across threads.
-But the programmer working on it, the test suite validating it, and the compiler processing it
+When a program has explicit effects, the programmer working on it, 
+the test suite validating it, and the compiler processing it
 all know what each function does.
-The wiring has a diagram.
 
-The question is whether a language can draw that diagram.
-Whether the mechanisms that make type errors visible at compile time
-can make effect errors visible too.
-Whether the compiler can tell you, before you run anything,
+The challenge is making the compiler tell you, before you run anything,
 that a function you expected to be effect-free is secretly reaching out to the network.
-Whether the things now only discoverable by reading every line
-can instead be right there, in the interface.
+Now things formerly discoverable only by reading every line can instead be right there, in the type-checked interface.
 
-This question is answered in the rest of this book.
+[^1]: Although C++ popularized this idea, 
+its exception specification was not part of the type signature and was eventually removed from the language.
+Java introduced checked exceptions which *were* part of the type signature but only partially enforced, making them partially useless.
