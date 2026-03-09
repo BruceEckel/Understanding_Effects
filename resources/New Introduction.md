@@ -1,3 +1,5 @@
+[[Note that this is draft material and some aspects may be incomplete or incorrect]]
+
 The biggest productivity improvement in programming has arguably been libraries. The ability to easily import and use an existing library dramatically speeds up all programming. The programmer treats external modules as black boxes that provide solutions without writing that code from scratch.
 
 There’s a problem with this approach. We *want* to treat library components as black boxes that we simply use without thinking about. Indeed, some components do work that cleanly. But many do not; they have various *side effects* that the programmer must discover and write compensating code. The issue is that
