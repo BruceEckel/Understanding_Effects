@@ -10,7 +10,7 @@ We don’t know what that code does. It might change something in the world. It 
 
 For decades we’ve just accepted that this is just a (big) part of programming. Companies have spent massive amounts for programmers to perform these activities. Perhaps the worst problem is that as system size increases, this kind of programming doesn’t scale. This scaling barrier prevents us from solving problems.
 
-*Effect Systems* produce composability that is both easy and scalable. 
+*Effect Systems* produce composability that is both easy and scalable.
 
 The main benefit of easy composability is that people do not resist using it. This results in better designs because components are created based on fitness to purpose rather than an arbitrary constraint such as size.
 
@@ -26,19 +26,15 @@ Composability must withstand the problems of scale. A solution might work well i
 
 **Program Dependencies**. Are all necessary resources available and initialized? Inversion of control helps, but requires bookkeeping. As systems get larger, it becomes harder to discover dependency cycles.
 
-**Object-Oriented Programming.** This has been our biggest swing at the problem of scalable composition. Objects are composed from other objects. Even inheritance is composition, with extra steps. The valuable core of object-oriented programming is the user-defined data type. Unfortunately, the benefit of attaching every possible operation to each class didn't scale as well as we hoped. Inheritance hierarchies definitely don't scale. In the end, we don’t want to compose *objects*, but rather *operations*. A program's essence is not that it *is* something, but rather that it *does* something. 
+**Object-Oriented Programming.** This has been our biggest swing at the problem of scalable composition. Objects are composed from other objects. Even inheritance is composition, with extra steps. The valuable core of object-oriented programming is the user-defined data type. Unfortunately, the benefit of attaching every possible operation to each class didn't scale as well as we hoped. Inheritance hierarchies definitely don't scale. In the end, we don’t want to compose *objects*, but rather *operations*. A program's essence is not that it *is* something, but rather that it *does* something.
 
 Another way to think about composability is the conservation principle from physics and engineering: put an imaginary boundary around the component and everything that goes in should balance with everything that goes out (for example, energy or fluid). In our case the boundary measures information, and without Effect management we “leak” side effects. It’s possible for a programmer to compose a small number of simple components by writing custom code to manage the side effects (but it’s all too easy to miss some). An Effect System performs the necessary bookkeeping to guarantee reliable composition of effects so you can quickly and safely scale and refactor systems.
 
 Connection points, formalized and comes with a set of predefined connections.
 
-# When Effect Systems Make Sense
+# xxx
 
-If you’ve never worked with a large, complex system, the concepts in this book might not seem relevant to you. Although we’ve tried to boil our examples down to their essence, it is not possible to make a case for an Effect System using trivial “hello world”-style examples that demonstrate individual language features. You only see the benefits of an effect system during composition.
-
-This book argues that an Effect System is required to scalably compose operations.
-
-Because an Effect System solves multiple problems, it is easy to become fixated on one aspect before you understand the big picture. In particular, many tutorials use error handling as a first example. While this is compelling, it’s easy to stop at error handling and miss the other benefits. Also, this approach to error handling can be implemented apart from an Effect System, and you see it used this way in languages such as Rust and Go. 
+Because an Effect System solves multiple problems, it is easy to become fixated on one aspect before you understand the big picture. In particular, many tutorials use error handling as a first example. While this is compelling, it’s easy to stop at error handling and miss the other benefits. Also, this approach to error handling can be implemented apart from an Effect System, and you see it used this way in languages such as Rust and Go.
 
 # Composable Operations
 
@@ -46,40 +42,40 @@ We’ve been using the generic term “operation” which might sound like it me
 
 **`def add(x: a, y: a): a with Add[a] = x + y  // Hide`**
 
-**`def f(a: Int32, b: Int32): Int32 =  // Hide types`**  
-  **`let x = add(a, 10);`**  
-  **`let y = add(b, 100);`**  
+**`def f(a: Int32, b: Int32): Int32 =  // Hide types`**
+  **`let x = add(a, 10);`**
+  **`let y = add(b, 100);`**
   **`add(x, y) // Returns this result`**
 
-**`def main(): Unit \ IO =  // Hide`**  
-    **`println(f(11, 42))`**  
-     
+**`def main(): Unit \ IO =  // Hide`**
+    **`println(f(11, 42))`**
+
 Here, composition works seamlessly. For given values of **a** and **b**, you will always get the same result – this is so reliable that we can replace the function with a table lookup. Nothing ever fails, so **f()** never blows up with an exception.
 
 Function composition doesn’t always work this way. Indeed, **add()** and **f()** are special cases, examples of what we call *pure functions*. Pure functions compose seamlessly, but many functions are not pure. Consider a variation of **f()**:
 
-**`mod Time {  // Hide`**  
-    **`pub def ofDay(): Int64 \ Clock =`**  
-        **`Clock.currentTime(TimeUnit.Milliseconds)`**  
+**`mod Time {  // Hide`**
+    **`pub def ofDay(): Int64 \ Clock =`**
+        **`Clock.currentTime(TimeUnit.Milliseconds)`**
 **`}`**
 
-**`mod Rand {  // Hide`**  
-    **`pub def number(): Int64 \ Random =`**  
-        **`Random.randomInt64()`**  
-**`}`** 
+**`mod Rand {  // Hide`**
+    **`pub def number(): Int64 \ Random =`**
+        **`Random.randomInt64()`**
+**`}`**
 
-**`def add(x: a, y: a): a with Add[a] = x + y   // Hide`**  
+**`def add(x: a, y: a): a with Add[a] = x + y   // Hide`**
 **`def divide(x: a, y: a): a with Div[a] = x / y  // Hide`**
 
-**`// Hide types:`**  
-**`def g(a: Int64, b: Int64): Int64 \ {Clock, Random} =`**  
-  **`let x = add(a, Time.ofDay());`**  
-  **`let y = divide(b, Rand.number());`**  
+**`// Hide types:`**
+**`def g(a: Int64, b: Int64): Int64 \ {Clock, Random} =`**
+  **`let x = add(a, Time.ofDay());`**
+  **`let y = divide(b, Rand.number());`**
   **`add(x, y)`**
 
-**`def main(): Unit \ {IO, NonDet} =   // Hide`**  
-    **`run {`**  
-        **`println(g(11i64, 42i64))`**  
+**`def main(): Unit \ {IO, NonDet} =   // Hide`**
+    **`run {`**
+        **`println(g(11i64, 42i64))`**
     **`} with Clock.runWithIO with Random.runWithIO`**
 
 The result for **x** is different every time you call **timeOfDay()**. Because **y** is calculated using **Random.number()**, it is also different for each call. Providing **g()** with identical values of **a** and **b** produces a different result for each call. While the result of **f()** is predictable and consistent, the result of **g()** is not.
@@ -98,10 +94,10 @@ The main barrier to composing operations is wiring those operations together. Th
 
 We need a system that automatically takes care of the wiring when we compose operations. That is what an Effect System does. By automatically wiring your operations together, an effect system removes tedium, overhead, and compounding non-determinism. It may take longer to build something that composes, but once you've built it in a composable way once, others can then easily reuse it. Additions and changes that might typically take weeks can be achieved in a matter of minutes.
 
-Most of the work you do when composing a system involves these repetitive wiring activities: 
+Most of the work you do when composing a system involves these repetitive wiring activities:
 
-Resource management: initialization, cleanup, and dependencies  
-Error handling   
+Resource management: initialization, cleanup, and dependencies
+Error handling
 I/O: Communication with remote devices or systems
 
 # Exposing the Wires
@@ -114,8 +110,8 @@ These return types are complicated to look at, so in this book we rely on implic
 
 ## What it Looks Like
 
-If we imagine each operation (function) is a block, and the various issues we must  program around (results, errors, quirks) are wires, the process of assembling components could look like this:  
-![][image1]  
+If we imagine each operation (function) is a block, and the various issues we must  program around (results, errors, quirks) are wires, the process of assembling components could look like this:
+![][image1]
 The **Result** is the actual value an operation produces; traditionally this is the only thing returned from the function. This diagram shows everything else that happens when you call that function. Historically, the programmer must write code to compensate for all these hanging “wires.”
 
 We assume each type of error throws a different kind of exception and must be handled differently, or caught at a higher level, or ignored and caught at the top level which will terminate the program. Most exception-handling systems don’t track or guarantee that all errors will be handled.
@@ -124,7 +120,7 @@ The “Quirks” are the rest of the things that affect the program when the ope
 
 Every one of these “wires,” even the **Result**, can be considered a *side effect*: something irreversible that occurs as a consequence of performing the operation. Without an Effect System, the programmer is responsible for writing code that manages all the side effects, which is often repetitive, tedious, and error-prone. Because the side effects are not tracked in any way, the programmer must also know about them, either relying on the accuracy of the documentation or looking through the source code for side-effecting behavior. This practice does not scale.
 
-To compose operations without requiring the programmer to manage all these side effects, we need to somehow capture each set of wires into a connector, so the act of programming becomes simply pushing connectors together.  
+To compose operations without requiring the programmer to manage all these side effects, we need to somehow capture each set of wires into a connector, so the act of programming becomes simply pushing connectors together.
 ![][image2]
 
 Now each operation encapsulates its own side effects, turning that operation into an *Effect*. This is unfortunate terminology because now “Effect” uses the same word contained in the phrase “Side Effect.” They are two different but conflated ideas: Side Effects are all the quirks, while an Effect encapsulates those quirks. Conceptually, an Effect is an operation along with a connector. The connector provides a standardized way to compose that operation with other Effects.
@@ -135,12 +131,12 @@ Note that the “Effect Connector” is not universal. That is, each “Effect C
 
 To summarize, here are are all the features in an Effect System that produce composability at scale:
 
-* Guarantee that all errors are handled  
-* Automate error handling to minimize coding  
-* Control test results to ensure that failure cases are exercised  
-* Easy parallel execution  
-* (automatic?) async execution  
-* Guarantee all necessary resources are available, created & cleaned up in the correct order  
+* Guarantee that all errors are handled
+* Automate error handling to minimize coding
+* Control test results to ensure that failure cases are exercised
+* Easy parallel execution
+* (automatic?) async execution
+* Guarantee all necessary resources are available, created & cleaned up in the correct order
 * …
 
 # Providing Resources
@@ -163,22 +159,22 @@ Delayed execution is an essential part of an Effect System. The Effect System ru
 
 **Eager execution** is like an overachiever who does everything immediately:
 
-// Do it NOW\!  
-const result \= fetchFromDatabase(); // Already done  
+// Do it NOW\!
+const result \= fetchFromDatabase(); // Already done
 console.log(result); // Just use what we got
 
 **Delayed execution** is the procrastinator who writes everything down:
 
-// I'll do it later...  
-const todo \= () \=\> fetchFromDatabase(); // Just a plan  
-// ... time passes, plans accumulate, nothing happens yet ...  
+// I'll do it later...
+const todo \= () \=\> fetchFromDatabase(); // Just a plan
+// ... time passes, plans accumulate, nothing happens yet ...
 const result \= todo(); // FINE, I'll do it now
 
 The magic of procrastination isn't avoiding work—it's **controlling when** work happens:
 
-1. **You can cancel tasks**: "Actually, never mind" (turns out we didn’t need the work)  
-2. **You can reorder tasks**: "Wait, database first, then email"  
-3. **You can combine tasks**: "I'll batch these three calls together"  
+1. **You can cancel tasks**: "Actually, never mind" (turns out we didn’t need the work)
+2. **You can reorder tasks**: "Wait, database first, then email"
+3. **You can combine tasks**: "I'll batch these three calls together"
 4. **You can delegate**: "Someone else can execute this plan"
 
 The procrastinator's to-do list becomes a **composable plan** rather than a bunch of already-completed actions. You're not lazy—you're *strategically deferring execution* to enable better composition.
@@ -189,9 +185,9 @@ Of course, eventually you have to stop planning and actually *run* the effects. 
 
 Imagine you wake up Saturday morning with errands to run. You could just start doing things—grab your keys, drive somewhere, do something—but instead, you write a to-do list. The list delays execution. Nothing has happened yet—you've just described what needs to happen, not when or how.
 
-You realize the dry cleaner closes at noon, so you reorder the list—dry cleaning goes first. You notice the hardware store is next to the gas station, so you batch those together. You check the fridge and see you already have milk, so you remove it from the grocery list. 
+You realize the dry cleaner closes at noon, so you reorder the list—dry cleaning goes first. You notice the hardware store is next to the gas station, so you batch those together. You check the fridge and see you already have milk, so you remove it from the grocery list.
 
-Within your grocery list, you reorder items to match the store layout: produce first, then dairy, then bread at the back. Same with hardware—sandpaper and screws are in the same aisle, paint is across the store.  
+Within your grocery list, you reorder items to match the store layout: produce first, then dairy, then bread at the back. Same with hardware—sandpaper and screws are in the same aisle, paint is across the store.
 Your spouse offers to help, so you split the work: they take the grocery list while you handle hardware and gas. Now you're executing in parallel.
 
 There's no undo button—some effects are irreversible. \[\[\[ Some or all? \]\]\]
@@ -200,105 +196,105 @@ The entire to-do list is an effect. Each shopping list is also an effect contain
 
 Here’s what it looks like in code:
 
-**`eff BuyMilk {`**  
-    **`def buyMilk(): Unit`**  
+**`eff BuyMilk {`**
+    **`def buyMilk(): Unit`**
 **`}`**
 
-**`eff BuyEggs {`**  
-    **`def buyEggs(): Unit`**  
+**`eff BuyEggs {`**
+    **`def buyEggs(): Unit`**
 **`}`**
 
-**`eff BuyScrews {`**  
-    **`def buyScrews(): Unit`**  
+**`eff BuyScrews {`**
+    **`def buyScrews(): Unit`**
 **`}`**
 
-**`eff BuyPaint {`**  
-    **`def buyPaint(): Unit`**  
+**`eff BuyPaint {`**
+    **`def buyPaint(): Unit`**
 **`}`**
 
-**`eff GetGas {`**  
-    **`def getGas(): Unit`**  
+**`eff GetGas {`**
+    **`def getGas(): Unit`**
 **`}`**
 
-**`eff GroceryStore {`**  
-    **`def buyGroceries(): Unit`**  
+**`eff GroceryStore {`**
+    **`def buyGroceries(): Unit`**
 **`}`**
 
-**`eff HardwareStore {`**  
-    **`def buyHardware(): Unit`**  
+**`eff HardwareStore {`**
+    **`def buyHardware(): Unit`**
 **`}`**
 
-**`// Handlers`**  
-**`def provideMilk(f: Unit -> a \ ef): a \ (ef - BuyMilk) + IO =`**  
-    **`run { f() } with handler BuyMilk {`**  
-        **`def buyMilk(_, resume) = { println("Buying milk"); resume() }`**  
+**`// Handlers`**
+**`def provideMilk(f: Unit -> a \ ef): a \ (ef - BuyMilk) + IO =`**
+    **`run { f() } with handler BuyMilk {`**
+        **`def buyMilk(_, resume) = { println("Buying milk"); resume() }`**
     **`}`**
 
-**`def provideEggs(f: Unit -> a \ ef): a \ (ef - BuyEggs) + IO =`**  
-    **`run { f() } with handler BuyEggs {`**  
-        **`def buyEggs(_, resume) = { println("Buying eggs"); resume() }`**  
+**`def provideEggs(f: Unit -> a \ ef): a \ (ef - BuyEggs) + IO =`**
+    **`run { f() } with handler BuyEggs {`**
+        **`def buyEggs(_, resume) = { println("Buying eggs"); resume() }`**
     **`}`**
 
-**`def provideScrews(f: Unit -> a \ ef): a \ (ef - BuyScrews) + IO =`**  
-    **`run { f() } with handler BuyScrews {`**  
-        **`def buyScrews(_, resume) = { println("Buying screws"); resume() }`**  
+**`def provideScrews(f: Unit -> a \ ef): a \ (ef - BuyScrews) + IO =`**
+    **`run { f() } with handler BuyScrews {`**
+        **`def buyScrews(_, resume) = { println("Buying screws"); resume() }`**
     **`}`**
 
-**`def providePaint(f: Unit -> a \ ef): a \ (ef - BuyPaint) + IO =`**  
-    **`run { f() } with handler BuyPaint {`**  
-        **`def buyPaint(_, resume) = { println("Buying paint"); resume() }`**  
+**`def providePaint(f: Unit -> a \ ef): a \ (ef - BuyPaint) + IO =`**
+    **`run { f() } with handler BuyPaint {`**
+        **`def buyPaint(_, resume) = { println("Buying paint"); resume() }`**
     **`}`**
 
-**`def provideGas(f: Unit -> a \ ef): a \ (ef - GetGas) + IO =`**  
-    **`run { f() } with handler GetGas {`**  
-        **`def getGas(_, resume) = { println("Getting gas"); resume() }`**  
+**`def provideGas(f: Unit -> a \ ef): a \ (ef - GetGas) + IO =`**
+    **`run { f() } with handler GetGas {`**
+        **`def getGas(_, resume) = { println("Getting gas"); resume() }`**
     **`}`**
 
-**`def groceryStore(f: Unit -> a \ ef): a \ (ef - GroceryStore) + {BuyEggs, BuyMilk} =`**  
-    **`run { f() } with handler GroceryStore {`**  
-        **`def buyGroceries(_, resume) = {`**  
-            **`BuyEggs.buyEggs();`**  
-            **`BuyMilk.buyMilk();`**  
-            **`resume()`**  
-        **`}`**  
+**`def groceryStore(f: Unit -> a \ ef): a \ (ef - GroceryStore) + {BuyEggs, BuyMilk} =`**
+    **`run { f() } with handler GroceryStore {`**
+        **`def buyGroceries(_, resume) = {`**
+            **`BuyEggs.buyEggs();`**
+            **`BuyMilk.buyMilk();`**
+            **`resume()`**
+        **`}`**
     **`}`**
 
-**`def hardwareStore(f: Unit -> a \ ef): a \ (ef - HardwareStore) + {BuyScrews, BuyPaint} =`**  
-    **`run { f() } with handler HardwareStore {`**  
-        **`def buyHardware(_, resume) = {`**  
-            **`BuyScrews.buyScrews();`**  
-            **`BuyPaint.buyPaint();`**  
-            **`resume()`**  
-        **`}`**  
+**`def hardwareStore(f: Unit -> a \ ef): a \ (ef - HardwareStore) + {BuyScrews, BuyPaint} =`**
+    **`run { f() } with handler HardwareStore {`**
+        **`def buyHardware(_, resume) = {`**
+            **`BuyScrews.buyScrews();`**
+            **`BuyPaint.buyPaint();`**
+            **`resume()`**
+        **`}`**
     **`}`**
 
-**`// Split work across two people`**  
-**`def personOne(): String \ GroceryStore = {`**  
-    **`GroceryStore.buyGroceries();`**  
-    **`"Person One tasks completed"`**  
+**`// Split work across two people`**
+**`def personOne(): String \ GroceryStore = {`**
+    **`GroceryStore.buyGroceries();`**
+    **`"Person One tasks completed"`**
 **`}`**
 
-**`def personTwo(): String \ {HardwareStore, GetGas} = {`**  
-    **`HardwareStore.buyHardware();`**  
-    **`GetGas.getGas();`**  
-    **`"Person Two tasks completed"`**  
+**`def personTwo(): String \ {HardwareStore, GetGas} = {`**
+    **`HardwareStore.buyHardware();`**
+    **`GetGas.getGas();`**
+    **`"Person Two tasks completed"`**
 **`}`**
 
-**`// The master errand list:`**  
-**`def thisWeekend(): Unit \ {IO, GroceryStore, HardwareStore, GetGas} = {`**  
-    **`println(personOne());`**  
-    **`println(personTwo())`**  
+**`// The master errand list:`**
+**`def thisWeekend(): Unit \ {IO, GroceryStore, HardwareStore, GetGas} = {`**
+    **`println(personOne());`**
+    **`println(personTwo())`**
 **`}`**
 
-**`def main(): Unit \ IO =`**  
-    **`run {`**  
-        **`thisWeekend()`**  
-    **`} with groceryStore`**  
-      **`with hardwareStore`**  
-      **`with provideEggs`**  
-      **`with provideMilk`**  
-      **`with provideScrews`**  
-      **`with providePaint`**  
+**`def main(): Unit \ IO =`**
+    **`run {`**
+        **`thisWeekend()`**
+    **`} with groceryStore`**
+      **`with hardwareStore`**
+      **`with provideEggs`**
+      **`with provideMilk`**
+      **`with provideScrews`**
+      **`with providePaint`**
       **`with provideGas`**
 
 ## Creating the Description
@@ -309,7 +305,7 @@ In most programming languages, function calls happen immediately:
 
 Effect systems take a different approach. Calling an Effect doesn't call the function, but instead returns a *description* of what will happen—a data structure representing the Effect. The Effect only executes when you explicitly run that description through the Effect System runtime, which you can think of as a very lightweight interpreter.
 
-**`let program = fetch(url)  // No network request yet—just a description`**  
+**`let program = fetch(url)  // No network request yet—just a description`**
 **`let result = run(program) // NOW the request happens`**
 
 \[\[\[Description of thunk, construction and mechanics\]\]\]
@@ -324,8 +320,8 @@ The answer is deeper than performance optimization. Delayed execution enables co
 
 Consider these combinators:
 
-**`def retry(effect: Eff[a, e], times: Int32): Eff[a, e]`**  
-**`def timeout(effect: Eff[a, e], duration: Duration): Eff[a, e + Timeout]`**  
+**`def retry(effect: Eff[a, e], times: Int32): Eff[a, e]`**
+**`def timeout(effect: Eff[a, e], duration: Duration): Eff[a, e + Timeout]`**
 **`def ifThenElse(cond: Bool, onTrue: Eff[a, e], onFalse: Eff[a, e]): Eff[a, e]`**
 
 Each requires control over *when* and *whether* execution happens. That control *is* the composition.
@@ -342,12 +338,12 @@ This reveals the core principle: certain composition operations *are* execution 
 
 A second consideration emerges when we look at independent operations:
 
-**`// Immediate execution - decisions locked in at each call`**  
-**`let result1 = fetch(url1)  // runs NOW, commits to sequential`**  
+**`// Immediate execution - decisions locked in at each call`**
+**`let result1 = fetch(url1)  // runs NOW, commits to sequential`**
 **`let result2 = fetch(url2)  // runs NOW, can't parallelize`**
 
-**`// Delayed execution - combine first, decide later`**  
-**`let program = Eff.zip(fetch(url1), fetch(url2))  // description only`**  
+**`// Delayed execution - combine first, decide later`**
+**`let program = Eff.zip(fetch(url1), fetch(url2))  // description only`**
 **`// runtime sees BOTH, can choose to parallelize`**
 
 Even with a perfect API, you cannot un-execute something. Once `fetch(url1)` runs, no interface can retroactively parallelize it with a later fetch.
@@ -358,31 +354,31 @@ This enables separation of concerns: business logic declares *what* should happe
 
 Is the execution tree fixed at compile time? No—the tree unfolds dynamically based on runtime values.
 
-**`def transfer(fromAcct: Account, toAcct: Account, amount: Int32): Eff[Unit, DbError] =`**  
-    **`foreach (`**  
-        **`bal <- getBalance(fromAcct)`**  
-    **`) yield {`**  
-        **`if (bal < amount)`**  
-            **`Eff.fail("Insufficient funds")`**  
-        **`else`**  
-            **`foreach (`**  
-                **`_ <- withdraw(fromAcct, amount);`**  
-                **`_ <- deposit(toAcct, amount)`**  
-            **`) yield ()`**  
+**`def transfer(fromAcct: Account, toAcct: Account, amount: Int32): Eff[Unit, DbError] =`**
+    **`foreach (`**
+        **`bal <- getBalance(fromAcct)`**
+    **`) yield {`**
+        **`if (bal < amount)`**
+            **`Eff.fail("Insufficient funds")`**
+        **`else`**
+            **`foreach (`**
+                **`_ <- withdraw(fromAcct, amount);`**
+                **`_ <- deposit(toAcct, amount)`**
+            **`) yield ()`**
     **`} |> Eff.flatten`**
 
 Whether `deposit` even *exists* in the tree depends on what `getBalance` returns. The tree's shape depends on runtime values.
 
 This is the essential distinction between `map` and `flatMap`:
 
-- **map** transforms values; tree shape unchanged  
+- **map** transforms values; tree shape unchanged
 - **flatMap** computes the next effect from the previous result; tree grows dynamically
 
 The runtime cannot see the whole tree upfront—it discovers the tree by running. Each step reveals the next branch.
 
 This creates a tension with "seeing the whole." More precisely: the runtime sees as much as is statically determined (enabling parallelization of independent branches), but must execute sequentially through `flatMap` boundaries where the next step depends on a result.
 
-**`Eff.zip(fetch(a), fetch(b))             // Both visible, can parallelize`**  
+**`Eff.zip(fetch(a), fetch(b))             // Both visible, can parallelize`**
 **`Eff.flatMap(fetch(a), x -> fetch(x))    // Second unknown until first completes`**
 
 The description is a *lazily unfolding* tree, not a fixed blueprint.
@@ -391,22 +387,22 @@ The description is a *lazily unfolding* tree, not a fixed blueprint.
 
 Let's trace through a concrete example to see how delayed execution works. Consider a function to fetch a user's profile, then fetch their recent orders:
 
-**`def getUserSummary(userId: Int32): Eff[Summary, HttpError] =`**  
-    **`foreach (`**  
-        **`user   <- fetchUser(userId);`**  
-        **`orders <- fetchOrders(user.id)`**  
+**`def getUserSummary(userId: Int32): Eff[Summary, HttpError] =`**
+    **`foreach (`**
+        **`user   <- fetchUser(userId);`**
+        **`orders <- fetchOrders(user.id)`**
     **`) yield Summary(user, orders)`**
 
 **Step 1: Building the description**
 
 If we call `getUserSummary(42)`, no network requests occur. Instead, we construct a data structure roughly equivalent to:
 
-**`FlatMap(`**  
-    **`effect: FetchUser(42),`**  
-    **`continuation: user -> Map(`**  
-        **`effect: FetchOrders(user.id),`**  
-        **`transform: orders -> Summary(user, orders)`**  
-    **`)`**  
+**`FlatMap(`**
+    **`effect: FetchUser(42),`**
+    **`continuation: user -> Map(`**
+        **`effect: FetchOrders(user.id),`**
+        **`transform: orders -> Summary(user, orders)`**
+    **`)`**
 **`)`**
 
 At this point, we have a value we can inspect, transform, or combine with other descriptions.
@@ -423,11 +419,11 @@ This wraps our description in another layer—still no execution. The timeout co
 
 Invoking the runtime on our function causes the following:
 
-1. `FetchUser(42)` performs the network request  
-2. The request returns `User(id = 42, name = "Alice")`  
-3. It passes this value to the continuation function  
-4. The continuation produces a *new* description: `FetchOrders(42)`  
-5. The runtime performs this second request  
+1. `FetchUser(42)` performs the network request
+2. The request returns `User(id = 42, name = "Alice")`
+3. It passes this value to the continuation function
+4. The continuation produces a *new* description: `FetchOrders(42)`
+5. The runtime performs this second request
 6. The result flows through `map` to produce the final `Summary`
 
 Throughout this process, the timeout combinator monitors elapsed time and can cancel execution if the limit is exceeded.
@@ -442,26 +438,26 @@ This is the power of delayed execution: we describe computations as composable v
 
 Here are the basic concepts/rules for an Effect System:
 
-1. An Effect is a function “with extra steps.”  
-2. An Effect exposes all the side effects it produces.  
-3. An Effect contains a thunk (an argument-less function definition) that calls the function with all its arguments bound. This produces *delayed execution*.  
-4. Each Effect declares its required dependencies (services, resources, other Effects, non-Effect arguments) in its type signature.The type system guarantees at compile time that all dependencies are satisfied. At runtime, concrete implementations of those dependencies are provided when the Effect is finally executed.  
-5. All dependencies that are themselves Effects are also thunks and so also have delayed execution; they are not run until they are needed (so sometimes we have to run them explicitly using **.run** ?)  
-6. To run the program, hand the starting Effect to the Effect System Runtime. The Runtime:  
-   1. Creates the necessary dependencies for that Effect  
-   2. Calls the Effect’s function while providing those dependencies.   
+1. An Effect is a function “with extra steps.”
+2. An Effect exposes all the side effects it produces.
+3. An Effect contains a thunk (an argument-less function definition) that calls the function with all its arguments bound. This produces *delayed execution*.
+4. Each Effect declares its required dependencies (services, resources, other Effects, non-Effect arguments) in its type signature.The type system guarantees at compile time that all dependencies are satisfied. At runtime, concrete implementations of those dependencies are provided when the Effect is finally executed.
+5. All dependencies that are themselves Effects are also thunks and so also have delayed execution; they are not run until they are needed (so sometimes we have to run them explicitly using **.run** ?)
+6. To run the program, hand the starting Effect to the Effect System Runtime. The Runtime:
+   1. Creates the necessary dependencies for that Effect
+   2. Calls the Effect’s function while providing those dependencies.
    3. Effects used by that function are run as they are needed.
 
-![][image3]  
+![][image3]
 **(Only here as a conversation starter)**
 
 Pure functions trivially parallelize (no shared state). For effectful code, it depends on the system:
 
-* ZIO: You explicitly choose with combinators like zipPar; the system doesn't auto-verify safety  
-* Effect.ts: There’s only one thread, so parallelization issues magically vanish\!  
+* ZIO: You explicitly choose with combinators like zipPar; the system doesn't auto-verify safety
+* Effect.ts: There’s only one thread, so parallelization issues magically vanish\!
 * Algebraic effect systems (Koka, Flix): Can potentially reason about effect independence since effects are tracked more granularly
 
-Is every Effect automatically async?  
+Is every Effect automatically async?
 No. You get control over this. Effects are descriptions—you choose sync vs async execution with operators like fork. The runtime may use fibers (lightweight threads), but async isn't automatic or implicit.
 
 # Pseudocode
@@ -472,56 +468,56 @@ The first example registers a new user:
 
 // possible break apart type Database.save & Email.send
 
-Database.save(user): Effect\<  
-  requires=Database,  
-  errors=DBError  
-  returns=User  
+Database.save(user): Effect\<
+  requires=Database,
+  errors=DBError
+  returns=User
 \>
 
-Email.send(sendArgs): Effect\<  
-  requires=EmailServer,  
-  errors=EmailError,  
-  returns=Nothing  
+Email.send(sendArgs): Effect\<
+  requires=EmailServer,
+  errors=EmailError,
+  returns=Nothing
 \>
 
-**`function registerUser(email, password):`**   
-  **`Effect<`**  
-    **`requires=Database & EmailServer,`**  
-    **`errors=DBError | EmailError`**  
-    **`result=User`**  
-  **`> =  {`**  
-  **`user = User(email, hashPassword(password))`**  
-  **`savedUser = Database.save(user))`**  
-    
-  **`run(`**  
-    **`Email.send(`**  
-      **`to = savedUser.email,`**  
-      **`subject = "Welcome!",`**  
-      **`body = "Thanks for registering"`**  
-    **`)`**  
-  **`)`**  
-    
-  **`return savedUser`**  
+**`function registerUser(email, password):`**
+  **`Effect<`**
+    **`requires=Database & EmailServer,`**
+    **`errors=DBError | EmailError`**
+    **`result=User`**
+  **`> =  {`**
+  **`user = User(email, hashPassword(password))`**
+  **`savedUser = Database.save(user))`**
+
+  **`run(`**
+    **`Email.send(`**
+      **`to = savedUser.email,`**
+      **`subject = "Welcome!",`**
+      **`body = "Thanks for registering"`**
+    **`)`**
+  **`)`**
+
+  **`return savedUser`**
 **`}`**
 
-**`# Requires: Database, Email`**  
-**`# Errors: DBError | EmailError | ValidationError`**    
+**`# Requires: Database, Email`**
+**`# Errors: DBError | EmailError | ValidationError`**
 **`# Returns: User`**
 
-**`function main() {`**  
-  **`program = registerUser("user@example.com", "secret123")`**  
-    
-  **`environment = {`**  
-    **`database = PostgresDB.connect("localhost"),`**  
-    **`email = SMTPEmail.connect("smtp.example.com")`**  
-  **`}`**  
-    
-  **`result = run(program, environment)`**  
-    
-  **`match result {`**  
-    **`Success(user) => println("User registered: " + user.email)`**  
-    **`Failure(error) => println("Registration failed: " + error)`**  
-  **`}`**  
+**`function main() {`**
+  **`program = registerUser("user@example.com", "secret123")`**
+
+  **`environment = {`**
+    **`database = PostgresDB.connect("localhost"),`**
+    **`email = SMTPEmail.connect("smtp.example.com")`**
+  **`}`**
+
+  **`result = run(program, environment)`**
+
+  **`match result {`**
+    **`Success(user) => println("User registered: " + user.email)`**
+    **`Failure(error) => println("Registration failed: " + error)`**
+  **`}`**
 **`}`**
 
 (Description)
@@ -532,78 +528,78 @@ Note that the **environment** is cleanly separated from the rest of the program.
 
 Here’s a more complex example that processes a collection of orders:
 
-**`function processOrders(date) {`**  
-  **`# Fetch orders using retry logic`**  
-  **`orders = Database.query("SELECT * FROM orders WHERE date = ?", date)`**  
-    **`.retry(maxAttempts = 3, backoff = exponential)`**  
-    
-  **`# Process orders in parallel`**  
-  **`results = collectAllPar(orders, processOrder)`**  
-    
-  **`# Generate and cache report`**  
-  **`reportData = generateReport(results)`**  
-    
-  **`cached = Cache.get("report:" + date)`**  
-    **`.orElse {`**  
-      **`path = FileSystem.write("reports/" + date + ".pdf", reportData)`**  
-      **`Cache.set("report:" + date, path, ttl = 3600)`**  
-      **`return path`**  
-    **`}`**  
-    
-  **`return cached`**  
+**`function processOrders(date) {`**
+  **`# Fetch orders using retry logic`**
+  **`orders = Database.query("SELECT * FROM orders WHERE date = ?", date)`**
+    **`.retry(maxAttempts = 3, backoff = exponential)`**
+
+  **`# Process orders in parallel`**
+  **`results = collectAllPar(orders, processOrder)`**
+
+  **`# Generate and cache report`**
+  **`reportData = generateReport(results)`**
+
+  **`cached = Cache.get("report:" + date)`**
+    **`.orElse {`**
+      **`path = FileSystem.write("reports/" + date + ".pdf", reportData)`**
+      **`Cache.set("report:" + date, path, ttl = 3600)`**
+      **`return path`**
+    **`}`**
+
+  **`return cached`**
 **`}`**
 
-**`function processOrder(order) {`**  
-  **`# Check inventory with timeout`**  
-  **`inventory = Inventory.check(order.items)`**  
-    **`.timeout(seconds = 5)`**  
-    **`.orElse {`**  
-      **`Logging.warn("Inventory check failed")`**  
-      **`return estimateInventory(order.items)`**  
-    **`}`**  
-    
-  **`# Calculate shipping if available`**  
-  **`if !inventory {`**  
-    **`return fail(OutOfStock(order.id))`**  
-  **`}`**  
-    
-  **`shipping = HTTP.post(`**  
-    **`"https://api.shipping.com/calculate",`**  
-    **`body = order.shippingAddress`**  
-  **`)`**  
-    
-  **`# Update order`**  
-  **`Database.update(`**  
-    **`"UPDATE orders SET shipping = ?, total = ? WHERE id = ?",`**  
-    **`shipping.cost, order.subtotal + shipping.cost, order.id`**  
-  **`)`**  
+**`function processOrder(order) {`**
+  **`# Check inventory with timeout`**
+  **`inventory = Inventory.check(order.items)`**
+    **`.timeout(seconds = 5)`**
+    **`.orElse {`**
+      **`Logging.warn("Inventory check failed")`**
+      **`return estimateInventory(order.items)`**
+    **`}`**
+
+  **`# Calculate shipping if available`**
+  **`if !inventory {`**
+    **`return fail(OutOfStock(order.id))`**
+  **`}`**
+
+  **`shipping = HTTP.post(`**
+    **`"https://api.shipping.com/calculate",`**
+    **`body = order.shippingAddress`**
+  **`)`**
+
+  **`# Update order`**
+  **`Database.update(`**
+    **`"UPDATE orders SET shipping = ?, total = ? WHERE id = ?",`**
+    **`shipping.cost, order.subtotal + shipping.cost, order.id`**
+  **`)`**
 **`}`**
 
-**`# Requires: Database, Inventory, HTTP, Cache, FileSystem, Logging`**  
-**`# Errors: DBError | InventoryError | HTTPError | TimeoutError | OutOfStock`**  
+**`# Requires: Database, Inventory, HTTP, Cache, FileSystem, Logging`**
+**`# Errors: DBError | InventoryError | HTTPError | TimeoutError | OutOfStock`**
 **`# Returns: String (report path)`**
 
-**`function main() {`**  
-  **`program = processOrders("2024-01-15")`**  
-    
-  **`environment = {`**  
-    **`database = PostgresDB.connect(config.dbUrl),`**  
-    **`inventory = InventoryService.connect(config.inventoryUrl),`**  
-    **`http = HTTPClient.create(timeout = 30),`**  
-    **`cache = RedisCache.connect(config.redisUrl),`**  
-    **`fileSystem = LocalFileSystem,`**  
-    **`logging = ConsoleLogger`**  
-  **`}`**  
-    
-  **`result = run(program, environment)`**  
-    
-  **`match result {`**  
-    **`Success(reportPath) => println("Report saved to: " + reportPath)`**  
-    **`Failure(error) => {`**  
-      **`println("Processing failed: " + error)`**  
-      **`exitCode = 1`**  
-    **`}`**  
-  **`}`**  
+**`function main() {`**
+  **`program = processOrders("2024-01-15")`**
+
+  **`environment = {`**
+    **`database = PostgresDB.connect(config.dbUrl),`**
+    **`inventory = InventoryService.connect(config.inventoryUrl),`**
+    **`http = HTTPClient.create(timeout = 30),`**
+    **`cache = RedisCache.connect(config.redisUrl),`**
+    **`fileSystem = LocalFileSystem,`**
+    **`logging = ConsoleLogger`**
+  **`}`**
+
+  **`result = run(program, environment)`**
+
+  **`match result {`**
+    **`Success(reportPath) => println("Report saved to: " + reportPath)`**
+    **`Failure(error) => {`**
+      **`println("Processing failed: " + error)`**
+      **`exitCode = 1`**
+    **`}`**
+  **`}`**
 **`}`**
 
 (Description)
@@ -620,9 +616,9 @@ To integrate a component into your system, you must know, reliably, if and how t
 
 It might explode. For a long time, our strategies were:
 
-1. Remain ignorant of the possibility  
-2. Cross our fingers  
-3. Accept it and restart the program  
+1. Remain ignorant of the possibility
+2. Cross our fingers
+3. Accept it and restart the program
 4. If it’s really annoying, write some code to make it less bad
 
 Exceptions were intended to prevent \#1. With *exception specifications*, a function advertises how it will explode. This only works if exceptions come with a type system that guarantees the exception specifications tell the truth when the function calls other functions that throw exceptions. Without fully enforcing exception specifications, they are basically useless other than producing slightly more valuable stack traces.
