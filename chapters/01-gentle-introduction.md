@@ -165,41 +165,41 @@ Consider a function that takes two numbers and returns their sum.
 It needs nothing from the world beyond its arguments.
 It leaves no trace.
 Call it a hundred times and get the same result each time.
-That function has no effects -- it is "pure".
+That function has no Effects -- it is "pure".
 
 Many functions are not like that.
 They need things from the world.
 They leave traces in the world.
-The concept of an effect draws a line between the two:
+The concept of an Effect draws a line between the two:
 computation on one side, interaction with the outside world on the other.
 
 That line matters because the two sides behave differently.
 You can reason about computation by reading code alone.
-To reason about effects, you need context:
+To reason about Effects, you need context:
 
 - What environment the function runs in
 - What state the world is in when it executes
 - What might fail
 - What might change
 
-When effects are invisible, when nothing in the code signals their presence,
+When Effects are invisible, when nothing in the code signals their presence,
 that context is hidden.
-This means you must keep track of effects yourself.
-You must discover and understand the effects of your code by reading its documentation, testing it, and observing its behavior.
+This means you must keep track of Effects yourself.
+You must discover and understand the Effects of your code by reading its documentation, testing it, and observing its behavior.
 Because we can't always trust documentation (it may be outdated, incomplete, or wrong),
 you must be ready to read the source code of the functions you call.
 
 When programs are small, these are relatively manageable activites.
 As systems scale, these activities become increasingly challenging.
-A large portion of programming activity is consumed through managing effects by hand.
+A large portion of programming activity is consumed through managing Effects by hand.
 
 ## Common Effects
 
 The most familiar Effect is **state**: reading or modifying a value outside the function's own scope.
-A method that increments a counter on its object has a state effect.
-A function that reads from a global configuration object has a state effect.
+A method that increments a counter on its object has a state Effect.
+A function that reads from a global configuration object has a state Effect.
 So does any function that mutates its arguments.
-State effects are the ones most often left implicit.
+State Effects are the ones most often left implicit.
 The counter increments, the configuration gets read,
 and nothing in the function's signature mentions either.
 
@@ -221,7 +221,7 @@ This is a significant impact which is why exceptions are Effects.
 
 **Concurrency** is an Effect because functions must coordinate with computations running in parallel.
 Acquiring a lock, posting to a message queue, waiting for another task to complete:
-these are effects because they involve something outside the function's own thread of execution.
+these are Effects because they involve something outside the function's own thread of execution.
 A function that looks simple acquires a lock the caller already holds, and the program deadlocks.
 Nothing in the signature warned you.
 
@@ -240,17 +240,17 @@ And in most languages, nothing makes it visible.
 
 ## Effects Are Not Optional
 
-The problem is not that effects exist.
+The problem is not that Effects exist.
 The problem is what happens when they are invisible.
 
 On the first page of this chapter, we considered a test that failed intermittently.
-Look at the cost of the invisible effects:
+Look at the cost of the invisible Effects:
 
 - They made the test slow, because nothing indicated it needed a running service.
 - They made tests interfere with each other, because nothing indicated they shared state.
 - They required reading three levels of implementation to diagnose a simple failure.
 
-Every one of those costs came from the same source: the effects were hidden.
+Every one of those costs came from the same source: the Effects were hidden.
 
 That cost amplifies.
 In a small codebase, you can hold enough context in your head to stay ahead of it.
@@ -261,32 +261,32 @@ Each step adds invisible dependencies.
 No one has the full picture.
 
 These are not random failures.
-They are the predictable result of effects flowing through a codebase
+They are the predictable result of Effects flowing through a codebase
 with nothing to mark their path.
 Effects connect functions to the world and to each other.
 When those connections are untracked, every change is a guess.
 
-You cannot write useful programs without effects.
+You cannot write useful programs without Effects.
 When a user clicks a button, something must happen.
 When data must persist, it must be written somewhere.
 When two services must coordinate, they must communicate.
-Remove all effects, and you have removed everything the program was built to do.
+Remove all Effects, and you have removed everything the program was built to do.
 
-When a program has explicit effects, the programmer working on it,
+When a program has explicit Effects, the programmer working on it,
 the test suite validating it, and the compiler processing it
 all know what each function does.
 
 The challenge is making the compiler tell you, before you run anything,
-that a function you expected to be effect-free is secretly reaching out to the network.
+that a function you expected to be Effect-free is secretly reaching out to the network.
 Now things formerly discoverable only by reading every line can instead be right there, in the type-checked interface.
 
 ## When Effect Systems Make Sense
 
+This book argues that an Effect System is required to scalably compose operations.
+
 If you’ve never worked with a large, complex system, the concepts in this book might not seem relevant to you.
 It is not possible to make a case for an Effect System using trivial examples that demonstrate individual language features.
-You only see the benefits of an effect system during composition *at scale*.
-
-This book argues that an Effect System is required to scalably compose operations.
+You only see the benefits of an Effect system during composition *at scale*.
 
 [^1]: Although C++ popularized this idea,
 its exception specification was not part of the type signature and was eventually removed from the language.

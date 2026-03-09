@@ -1,9 +1,8 @@
 # Effect Systems: Built-in vs Add-on
 
-Languages have been grappling with effect visibility for decades,
-and they have not arrived at the same answer.
-Some languages were designed from the start with effects as a first-class concern.
-Others found effect management as a later need,
+After grappling with Effect visibility for decades, designers arrived at two different approaches.
+Some languages are designed from the start with Effects as a first-class concern.
+Others found Effect management as a later need,
 addressed by libraries that work within the constraints of existing language designs.
 
 These two families look different from the inside.
@@ -22,55 +21,55 @@ This chapter looks at both families and the origin of the difference.
 
 ## Built-in Effect Systems
 
-In a built-in effect system, effects live in the type system alongside ordinary types.
-A function's signature carries two pieces of information: what it returns, and what effects it performs.
+In a built-in Effect system, Effects live in the type system alongside ordinary types.
+A function's signature carries two pieces of information: what it returns, and what Effects it performs.
 Both are visible in the signature.
 Neither requires reading the implementation to discover.
 
 The code itself looks like ordinary sequential programming.
 You call functions, bind values, return results.
-The compiler observes what you call and tracks the effects,
+The compiler observes what you call and tracks the Effects,
 the same way it tracks whether a value is an integer or a string.
 
 Here is what that looks like in Koka, a language built around this approach.
-A function with no effects shows only a return type.
-A function with effects names them in the signature:
+A function with no Effects shows only a return type.
+A function with Effects names them in the signature:
 
 ```koka
-// No effects: takes two ints, returns an int, nothing else
+// No Effects: takes two ints, returns an int, nothing else
 fun add(x: int, y: int): int
   x + y
 
-// Console effect: the signature declares it openly
+// Console Effect: the signature declares it openly
 fun greet(name: string): <console> ()
   println("Hello, " ++ name)
 ```
 
-The angle brackets hold the **effect row**: the set of effects this function performs.
-`add` has an empty effect row, so nothing appears there.
+The angle brackets hold the **Effect row**: the set of Effects this function performs.
+`add` has an empty Effect row, so nothing appears there.
 `greet` performs console I/O, so `<console>` appears in its signature.
 
 Here is the same example in Flix:
 
 ```flix
-// No effects: signature shows only the return type
+// No Effects: signature shows only the return type
 def add(x: Int32, y: Int32): Int32 = x + y
 
-// The backslash begins the effect row
+// The backslash begins the Effect row
 def greet(name: String): Unit \ IO =
     println("Hello, ${name}")
 ```
 
-Effects appear after a backslash in function signatures
-rather than in angle brackets.
+Flix Effects appear after a backslash in function signatures
+rather than within angle brackets.
 
-Notice the Effect information lives in the type.
+Now the Effect information lives in the type.
 A caller sees what `greet` does without `greet` needing to accept the console as a parameter.
-The effect row is a dedicated channel for this information,
+The Effect row is a dedicated channel for this information,
 separate from inputs and separate from the return value.
 
-Effect annotations propagate automatically.
-If a function calls `greet`, the compiler adds `console` to its own effect row.
+With a built-in system, Effect annotations propagate automatically.
+If a function calls `greet`, the compiler adds `console` to its own Effect row.
 The compiler infers them from what you call.
 You can annotate explicitly when you want to constrain what a function is allowed to do.
 
@@ -78,16 +77,16 @@ Effects also need to be fulfilled somewhere.
 Something must decide what actually happens when a function signals a failure,
 or asks for a configuration value, or reaches for the console.
 In a built-in system, that mechanism is the **handler**:
-a construct that intercepts an effect and provides its implementation.
+a construct that intercepts an Effect and provides its implementation.
 
-Here is a custom effect and a handler that gives it meaning:
+Here is a custom Effect and a handler that gives it meaning:
 
 ```koka
-// Declare a custom effect: this computation can signal failure
-effect fail
+// Declare a custom Effect: this computation can signal failure
+Effect fail
   ctl fail(msg: string): a
 
-// A function that uses the effect — the signature names it
+// A function that uses the Effect — the signature names it
 fun safe-divide(x: int, y: int): <fail> int
   if y == 0 then fail("division by zero")
   else x / y
@@ -102,22 +101,22 @@ fun with-default(default: int, action: () -> <fail> int): int
 // with-default(0) { safe-divide(10, 2) }  =>  5
 ```
 
-<!-- VERIFY: Koka effect declaration syntax (effect/ctl), handler syntax (with handler / ctl), and angle-bracket effect row in signatures -->
+<!-- VERIFY: Koka Effect declaration syntax (Effect/ctl), handler syntax (with handler / ctl), and angle-bracket Effect row in signatures -->
 
 `safe-divide` does not decide what happens when division fails.
 Its caller installs a handler that makes that decision.
-The effect in the type ensures you cannot call `safe-divide` in a context
+The Effect in the type ensures you cannot call `safe-divide` in a context
 where failure has no handler — the compiler catches that before you run anything.
 
 The code reads sequentially.
-The effects are visible in the types.
-The handlers connect effects to implementations.
+The Effects are visible in the types.
+The handlers connect Effects to implementations.
 
 
 ```flix
 
 
-// A custom effect and a function that uses it
+// A custom Effect and a function that uses it
 eff Fail {
     def fail(msg: String): a
 }
@@ -127,10 +126,10 @@ def safeDivide(x: Int32, y: Int32): Int32 \ Fail =
     else x / y
 ```
 
-<!-- VERIFY: Flix backslash effect set notation, eff/def declaration syntax inside eff block, do keyword for performing effects, IO effect name -->
+<!-- VERIFY: Flix backslash Effect set notation, eff/def declaration syntax inside eff block, do keyword for performing Effects, IO Effect name -->
 
 Angle brackets or backslash, the discipline is the same:
-effects in the signature, inferred by the compiler,
+Effects in the signature, inferred by the compiler,
 required to be handled before execution proceeds.
 
 Languages in this family include Koka, Eff, Effekt, Unison, and Flix.
@@ -139,17 +138,17 @@ Languages in this family include Koka, Eff, Effekt, Unison, and Flix.
 
 Not every language with a thriving ecosystem could be rebuilt from scratch.
 Java, Scala, and Python had decades of libraries, tooling, and production code.
-Redesigning their type systems around effects was not an option.
+Redesigning their type systems around Effects was not an option.
 
 Library authors found a different path.
-Rather than asking the compiler to track effects natively,
-they used the existing type system to encode effect information into the types of values.
+Rather than asking the compiler to track Effects natively,
+they used the existing type system to encode Effect information into the types of values.
 The approach works, but it requires a shift in mechanism:
-instead of writing a computation and having the compiler observe its effects,
+instead of writing a computation and having the compiler observe its Effects,
 you build a **description** of a computation and execute that description later.
 
 In ZIO, a widely-used Scala library, that description is a value of type `ZIO[R, E, A]`.
-The three type parameters carry the effect information:
+The three type parameters carry the Effect information:
 `R` is the environment the computation requires,
 `E` is the type of error it can produce,
 and `A` is the type of value it produces on success.
@@ -190,13 +189,13 @@ Everything above `run` is description.
 `run` is where description becomes action.
 
 This boundary is not incidental. It is the mechanism.
-The compiler sees what effects a function might perform by looking at its return type,
+The compiler sees what Effects a function might perform by looking at its return type,
 the same way it inspects any other type.
-But the effects are encoded in a library type, not tracked natively by the language.
+But the Effects are encoded in a library type, not tracked natively by the language.
 
 Effect, a TypeScript library, uses the same approach.
 Its description type is `Effect<Success, Error, Requirements>` —
-the type parameters carry effect information in the same three roles,
+the type parameters carry Effect information in the same three roles,
 with different names.
 
 ```typescript
@@ -226,42 +225,42 @@ Execution happens at the boundary:
 Effect.runSync(greet)
 ```
 
-<!-- VERIFY: Effect.ts type parameter order (Effect<A, E, R>), generator yield* syntax, Effect.sync for wrapping synchronous side effects, runSync vs runPromise -->
+<!-- VERIFY: Effect.ts type parameter order (Effect<A, E, R>), generator yield* syntax, Effect.sync for wrapping synchronous side Effects, runSync vs runPromise -->
 
 The description/execution split works identically in TypeScript.
 The library controls execution; everything above the boundary is description.
 
 Libraries in this family include ZIO, Cats Effect, and Kyo in Scala;
-polysemy and effectful in Haskell; and Effect in TypeScript.
+polysemy and Effectful in Haskell; and Effect in TypeScript.
 
 ## Why the Split Exists
 
-The two families did not emerge from competing theories about the right way to manage effects.
+The two families did not emerge from competing theories about the right way to manage Effects.
 They emerged from different starting points.
 
 Languages like Koka and Eff were designed from scratch by researchers
-whose central goal was exploring what a language built around effects could look like.
+whose central goal was exploring what a language built around Effects could look like.
 With no existing codebase to preserve and no compatibility constraints to honor,
-they could put effects into the type system at the foundation.
+they could put Effects into the type system at the foundation.
 Everything else in the language was built around that choice.
 
 Scala arrived at its approach by a different route.
 It had years of production use, a large library ecosystem, and deep interoperability with Java.
 Redesigning the language's type system from scratch was not possible.
-But Scala's type system was expressive enough that library authors could encode effect information
+But Scala's type system was expressive enough that library authors could encode Effect information
 into types without any compiler changes.
-ZIO and Cats Effect are the result: full-featured effect systems built entirely as libraries,
+ZIO and Cats Effect are the result: full-featured Effect systems built entirely as libraries,
 working within the language as it already existed.
 
 The constraint shaped the mechanism.
-The description/execution split is a natural consequence of encoding effects into values
+The description/execution split is a natural consequence of encoding Effects into values
 in a language that was not designed for them.
-To track whether a function is effectful, the type must carry that information.
+To track whether a function is Effectful, the type must carry that information.
 To make that type meaningful, execution must be deferred to a boundary the library controls.
 That is what makes the mechanism work.
 
 Neither starting point was wrong.
-A language designed around effects from the ground up can offer things a library cannot.
+A language designed around Effects from the ground up can offer things a library cannot.
 It can provide tighter compiler integration, cleaner error messages,
 and syntax that feels native rather than adapted.
 A library built on top of an established language brings something different:
@@ -273,30 +272,30 @@ It is a matter of context.
 ## What They Share
 
 The two families look different from the outside and work differently on the inside.
-But both make effects visible.
-In a built-in system, the effect row in a function's signature tells you what that function does.
+But both make Effects visible.
+In a built-in system, the Effect row in a function's signature tells you what that function does.
 In an add-on system, the type parameters of the description type tell you the same thing.
 The mechanism is different.
-The result is the same: effects you can see without reading the body.
+The result is the same: Effects you can see without reading the body.
 
-Both separate the declaration of effects from their implementation.
-In Koka, a function declares a `<fail>` effect without deciding what failure means.
+Both separate the declaration of Effects from their implementation.
+In Koka, a function declares a `<fail>` Effect without deciding what failure means.
 A handler somewhere up the call stack makes that decision.
 In ZIO, a function returns a `ZIO[R, E, A]` without deciding what environment it runs in
 or how its errors are resolved.
 The caller provides that through configuration.
-Neither the function nor the description owns the implementation of its own effects.
+Neither the function nor the description owns the implementation of its own Effects.
 
-Both let the compiler or runtime enforce effect discipline.
-In a built-in system, the compiler rejects code that uses an unhandled effect.
+Both let the compiler or runtime enforce Effect discipline.
+In a built-in system, the compiler rejects code that uses an unhandled Effect.
 In an add-on system, the type system rejects code that runs a description
 with unsatisfied dependencies or unresolved error types.
 The enforcement looks different, but the principle is the same:
-you cannot ignore effects. The language, or the library, makes you account for them.
+you cannot ignore Effects. The language, or the library, makes you account for them.
 
-These three properties are what distinguish an effect system, of either kind,
-from the invisible effects of Chapter 1.
-The question is no longer whether effects exist.
+These three properties are what distinguish an Effect system, of either kind,
+from the invisible Effects of Chapter 1.
+The question is no longer whether Effects exist.
 It is how they are declared, who handles them, and what happens when you fail to account for them.
 
 The next chapter looks at what living with those answers actually feels like.
