@@ -1,27 +1,22 @@
-# Effect Systems: Built-in vs Add-on
+# Effect Systems: Native vs Addon
 
-After grappling with Effect visibility for decades, designers arrived at two different approaches.
-Some languages are designed from the start with Effects as a first-class concern.
-Others found Effect management as a later need,
-addressed by libraries that work within the constraints of existing language designs.
+Ideally, Effects are directly supported by the language; we'll call this a native Effect system.
+It's also possible to implement an Effect System as an addon library for an existing language,
+as long as that language has a type system.
 
-These two families look different from the inside.
-Programs written in the first family look like ordinary sequential code.
+These two approaches produce different programming experiences.
+Programs written in a native Effect system look like ordinary sequential code.
 Effect information lives in type signatures, tracked by the compiler.
-Programs written in the second family work differently:
+Programs written for an addon Effect system work differently:
 you construct descriptions of what a program should do, then execute those descriptions.
 
-The difference did not arise because one school of thought was right and another wrong.
-It arose from the history of specific languages and their communities:
-what problems they were designed to solve,
-when they were designed,
-and what constraints they had to work within.
+You'll have a better programming experience with a native Effect system.
+However, it's highly likely that you don't have the flexibility to change languages,
+in which case an addon Effect system allows you to use Effects with your language of choice.
 
-This chapter looks at both families and the origin of the difference.
+## Native Effect Systems
 
-## Built-in Effect Systems
-
-In a built-in Effect system, Effects live in the type system alongside ordinary types.
+In a native Effect system, Effects live in the type system alongside ordinary types.
 A function's signature carries two pieces of information: what it returns, and what Effects it performs.
 Both are visible in the signature.
 Neither requires reading the implementation to discover.
@@ -31,7 +26,7 @@ You call functions, bind values, return results.
 The compiler observes what you call and tracks the Effects,
 the same way it tracks whether a value is an integer or a string.
 
-Here is what that looks like in Koka, a language built around this approach.
+Here is what that looks like in Koka, a language with native Effects.
 A function with no Effects shows only a return type.
 A function with Effects names them in the signature:
 
@@ -68,7 +63,7 @@ A caller sees what `greet` does without `greet` needing to accept the console as
 The Effect row is a dedicated channel for this information,
 separate from inputs and separate from the return value.
 
-With a built-in system, Effect annotations propagate automatically.
+With a native system, Effect annotations propagate automatically.
 If a function calls `greet`, the compiler adds `console` to its own Effect row.
 The compiler infers them from what you call.
 You can annotate explicitly when you want to constrain what a function is allowed to do.
@@ -76,7 +71,7 @@ You can annotate explicitly when you want to constrain what a function is allowe
 Effects also need to be fulfilled somewhere.
 Something must decide what actually happens when a function signals a failure,
 or asks for a configuration value, or reaches for the console.
-In a built-in system, that mechanism is the **handler**:
+In a native system, that mechanism is the **handler**:
 a construct that intercepts an Effect and provides its implementation.
 
 Here is a custom Effect and a handler that gives it meaning:
@@ -134,7 +129,7 @@ required to be handled before execution proceeds.
 
 Languages in this family include Koka, Eff, Effekt, Unison, and Flix.
 
-## Add-on Effect Systems
+## Addon Effect Systems
 
 Not every language with a thriving ecosystem could be rebuilt from scratch.
 Java, Scala, and Python had decades of libraries, tooling, and production code.
@@ -273,8 +268,8 @@ It is a matter of context.
 
 The two families look different from the outside and work differently on the inside.
 But both make Effects visible.
-In a built-in system, the Effect row in a function's signature tells you what that function does.
-In an add-on system, the type parameters of the description type tell you the same thing.
+In a native system, the Effect row in a function's signature tells you what that function does.
+In an addon system, the type parameters of the description type tell you the same thing.
 The mechanism is different.
 The result is the same: Effects you can see without reading the body.
 
@@ -287,8 +282,8 @@ The caller provides that through configuration.
 Neither the function nor the description owns the implementation of its own Effects.
 
 Both let the compiler or runtime enforce Effect discipline.
-In a built-in system, the compiler rejects code that uses an unhandled Effect.
-In an add-on system, the type system rejects code that runs a description
+In a native system, the compiler rejects code that uses an unhandled Effect.
+In an addon system, the type system rejects code that runs a description
 with unsatisfied dependencies or unresolved error types.
 The enforcement looks different, but the principle is the same:
 you cannot ignore Effects. The language, or the library, makes you account for them.
