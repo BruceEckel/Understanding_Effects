@@ -1,6 +1,6 @@
 # Effect Systems: Native vs Addon
 
-Ideally, Effects are directly supported by the language; we'll call this a native Effect system.
+Ideally, Effects are directly supported by the language; we'll call this a *native* Effect System.
 It's also possible to implement an Effect System as an addon library for an existing language,
 as long as that language has a type system.
 
@@ -221,49 +221,12 @@ The library controls execution; everything above the boundary is description.
 Libraries in this family include ZIO, Cats Effect, and Kyo in Scala;
 polysemy and Effectful in Haskell; and Effect in TypeScript.
 
-## Why the Split Exists
-
-The two families did not emerge from competing theories about the right way to manage Effects.
-They emerged from different starting points.
-
-Languages like Koka and Eff were designed from scratch by researchers
-whose central goal was exploring what a language built around Effects could look like.
-With no existing codebase to preserve and no compatibility constraints to honor,
-they could put Effects into the type system at the foundation.
-Everything else in the language was built around that choice.
-
-Scala arrived at its approach by a different route.
-It had years of production use, a large library ecosystem, and deep interoperability with Java.
-Redesigning the language's type system from scratch was not possible.
-But Scala's type system was expressive enough that library authors could encode Effect information
-into types without any compiler changes.
-ZIO and Cats Effect are the result: full-featured Effect systems built entirely as libraries,
-working within the language as it already existed.
-
-The constraint shaped the mechanism.
-The description/execution split is a natural consequence of encoding Effects into values
-in a language that was not designed for them.
-To track whether a function is Effectful, the type must carry that information.
-To make that type meaningful, execution must be deferred to a boundary the library controls.
-That is what makes the mechanism work.
-
-Neither starting point was wrong.
-A language designed around Effects from the ground up can offer things a library cannot.
-It can provide tighter compiler integration, cleaner error messages,
-and syntax that feels native rather than adapted.
-A library built on top of an established language brings something different:
-the entire ecosystem of that language, its tooling, its community,
-and years of production experience.
-Choosing between them is not a matter of correctness.
-It is a matter of context.
-
 ## What They Share
 
-The two families look different from the outside and work differently on the inside.
+The two approaches look different from the outside and work differently on the inside.
 But both make Effects visible.
 In a native system, the Effect row in a function's signature tells you what that function does.
-In an addon system, the type parameters of the description type tell you the same thing.
-The mechanism is different.
+In an addon system, Effects are packaged into the return type.
 The result is the same: Effects you can see without reading the body.
 
 Both separate the declaration of Effects from their implementation.
@@ -279,11 +242,5 @@ In a native system, the compiler rejects code that uses an unhandled Effect.
 In an addon system, the type system rejects code that runs a description
 with unsatisfied dependencies or unresolved error types.
 The enforcement looks different, but the principle is the same:
-you cannot ignore Effects. The language, or the library, makes you account for them.
-
-These three properties are what distinguish an Effect system, of either kind,
-from the invisible Effects of Chapter 1.
-The question is no longer whether Effects exist.
-It is how they are declared, who handles them, and what happens when you fail to account for them.
-
-The next chapter looks at what living with those answers actually feels like.
+you cannot ignore Effects.
+The language or library makes you account for them.
