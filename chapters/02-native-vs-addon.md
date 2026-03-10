@@ -18,10 +18,8 @@ in which case an addon Effect system allows you to use Effects with your languag
 
 In a native Effect system, Effects live in the type system alongside ordinary types.
 A function's signature carries two pieces of information: what it returns, and what Effects it performs.
-Both are visible in the signature.
-Neither requires reading the implementation to discover.
 
-The code itself looks like ordinary sequential programming.
+The function body looks like ordinary sequential programming.
 You call functions, bind values, return results.
 The compiler observes what you call and tracks the Effects,
 the same way it tracks whether a value is an integer or a string.
@@ -31,23 +29,23 @@ A function with no Effects shows only a return type.
 A function with Effects names them in the signature:
 
 ```koka
-// No Effects: takes two ints, returns an int, nothing else
+// Takes two ints, returns an int, no Effects:
 fun add(x: int, y: int): int
   x + y
 
-// Console Effect: the signature declares it openly
+// The console Effect is part of the signature:
 fun greet(name: string): <console> ()
   println("Hello, " ++ name)
 ```
 
 The angle brackets hold the **Effect row**: the set of Effects this function performs.
 `add` has an empty Effect row, so nothing appears there.
-`greet` performs console I/O, so `<console>` appears in its signature.
+`greet` performs console I/O, so `<console>` appears in its signature, and `()` indicates it returns nothing.
 
 Here is the same example in Flix:
 
 ```flix
-// No Effects: signature shows only the return type
+// No Effects:
 def add(x: Int32, y: Int32): Int32 = x + y
 
 // The backslash begins the Effect row
@@ -58,35 +56,33 @@ def greet(name: String): Unit \ IO =
 Flix Effects appear after a backslash in function signatures
 rather than within angle brackets.
 
-Now the Effect information lives in the type.
-A caller sees what `greet` does without `greet` needing to accept the console as a parameter.
-The Effect row is a dedicated channel for this information,
-separate from inputs and separate from the return value.
+The Effect information becomes part of the type.
+The caller sees that `greet` uses the `console` or `IO` Effect.
 
 With a native system, Effect annotations propagate automatically.
-If a function calls `greet`, the compiler adds `console` to its own Effect row.
-The compiler infers them from what you call.
-You can annotate explicitly when you want to constrain what a function is allowed to do.
+If a function calls `greet`, the compiler adds `console` or `IO` to its own Effect row.
+The compiler infers the Effects from what you call.
+You can also annotate explicitly when you want to constrain what a function is allowed to do.
 
-Effects also need to be fulfilled somewhere.
+Effects must be fulfilled at some point.
 Something must decide what actually happens when a function signals a failure,
-or asks for a configuration value, or reaches for the console.
+or asks for a configuration value, or uses the console.
 In a native system, that mechanism is the **handler**:
 a construct that intercepts an Effect and provides its implementation.
 
-Here is a custom Effect and a handler that gives it meaning:
+Here is a custom Effect with a handler:
 
 ```koka
-// Declare a custom Effect: this computation can signal failure
+// Declare a custom Effect that can fail:
 Effect fail
   ctl fail(msg: string): a
 
-// A function that uses the Effect — the signature names it
+// A function that uses the Effect:
 fun safe-divide(x: int, y: int): <fail> int
   if y == 0 then fail("division by zero")
   else x / y
 
-// A handler: decides what "fail" means in this context
+// The handler decides what "fail" means in this context:
 fun with-default(default: int, action: () -> <fail> int): int
   with handler
     ctl fail(_msg) -> default
@@ -107,10 +103,9 @@ The code reads sequentially.
 The Effects are visible in the types.
 The handlers connect Effects to implementations.
 
+Here's the Flix equivalent:
 
 ```flix
-
-
 // A custom Effect and a function that uses it
 eff Fail {
     def fail(msg: String): a
@@ -123,44 +118,40 @@ def safeDivide(x: Int32, y: Int32): Int32 \ Fail =
 
 <!-- VERIFY: Flix backslash Effect set notation, eff/def declaration syntax inside eff block, do keyword for performing Effects, IO Effect name -->
 
-Angle brackets or backslash, the discipline is the same:
-Effects in the signature, inferred by the compiler,
-required to be handled before execution proceeds.
+The compiler ensures that all Effects have handlers.
 
 Languages in this family include Koka, Eff, Effekt, Unison, and Flix.
 
 ## Addon Effect Systems
 
-Not every language with a thriving ecosystem could be rebuilt from scratch.
-Java, Scala, and Python had decades of libraries, tooling, and production code.
-Redesigning their type systems around Effects was not an option.
+It is not practical to require you to change languages to use Effects.
+If you've already committed to a language, you may not be able to switch.
 
-Library authors found a different path.
-Rather than asking the compiler to track Effects natively,
-they used the existing type system to encode Effect information into the types of values.
-The approach works, but it requires a shift in mechanism:
+To solve this problem, designers created *addon Effect systems*, implemented as libraries.
+In an existing language, the compiler doesn't track Effects,
+they used the existing type system to encode Effect information into the return type.
+The approach requires a shift in mechanism:
 instead of writing a computation and having the compiler observe its Effects,
 you build a **description** of a computation and execute that description later.
 
-In ZIO, a widely-used Scala library, that description is a value of type `ZIO[R, E, A]`.
+In the Scala ZIO library, that description is a value of type `ZIO[R, E, A]`.
 The three type parameters carry the Effect information:
 `R` is the environment the computation requires,
 `E` is the type of error it can produce,
 and `A` is the type of value it produces on success.
 
 ```scala
-// A description of a computation that:
-// - requires no environment (Any)
-// - can fail with an exception (Throwable)
-// - produces an Int on success
+// Requires no environment (Any)
+// Can fail with an exception (Throwable)
+// Produces an Int on success
 def safeDivide(x: Int, y: Int): ZIO[Any, Throwable, Int] =
   ZIO.attempt(x / y)
-
-// Nothing has run. safeDivide returns a description, not a result.
 ```
 
-You combine descriptions using for-comprehensions —
-Scala's syntax for chaining operations where each step can use the result of the previous one:
+Calling `safeDivide` doesn't execute the code — it returns a description, not a result.
+
+Within a function, you compose descriptions using for-comprehensions.
+Here is Scala's syntax for chaining operations where each step can use the result of the previous one:
 
 ```scala
 val program: ZIO[Any, Throwable, Unit] =
@@ -170,15 +161,16 @@ val program: ZIO[Any, Throwable, Unit] =
   yield ()
 ```
 
-`program` is still a value.
-Nothing has run.
+`program` is also only a value, and defining it does not execute any code.
 
-Execution happens at a single boundary, the runtime entry point:
+Execution happens at a the runtime entry point:
 
 ```scala
 object Main extends ZIOAppDefault:
   def run = program
 ```
+
+Sometimes we say that execution happens at the "edge".
 
 Everything above `run` is description.
 `run` is where description becomes action.
@@ -189,8 +181,8 @@ the same way it inspects any other type.
 But the Effects are encoded in a library type, not tracked natively by the language.
 
 Effect, a TypeScript library, uses the same approach.
-Its description type is `Effect<Success, Error, Requirements>` —
-the type parameters carry Effect information in the same three roles,
+Its description type is `Effect<Success, Error, Requirements>`.
+The type parameters carry Effect information in the same three roles,
 with different names.
 
 ```typescript
@@ -200,8 +192,9 @@ const safeDivide = (x: number, y: number): Effect.Effect<number, Error> =>
     ? Effect.fail(new Error("division by zero"))
     : Effect.succeed(x / y)
 
-// Nothing has run. safeDivide returns a description, not a result.
 ```
+
+As before, nothing has run. `safeDivide` returns a description, not a result.
 
 Descriptions compose using generator syntax:
 
@@ -212,9 +205,9 @@ const greet: Effect.Effect<void> = Effect.gen(function* () {
 })
 ```
 
-`greet` is still a value. Nothing has run.
+`greet` is also still a value. Nothing has run.
 
-Execution happens at the boundary:
+Execution happens at the edge:
 
 ```typescript
 Effect.runSync(greet)
@@ -222,7 +215,7 @@ Effect.runSync(greet)
 
 <!-- VERIFY: Effect.ts type parameter order (Effect<A, E, R>), generator yield* syntax, Effect.sync for wrapping synchronous side Effects, runSync vs runPromise -->
 
-The description/execution split works identically in TypeScript.
+Addon libraries require this description/execution split.
 The library controls execution; everything above the boundary is description.
 
 Libraries in this family include ZIO, Cats Effect, and Kyo in Scala;
