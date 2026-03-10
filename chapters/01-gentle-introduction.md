@@ -10,7 +10,6 @@ But sometimes the test is slow.
 Sometimes, if you run it alongside another test,
 one of them fails.
 
-You dig in.
 Three calls deep, inside a helper that formats currency,
 you find it:
 a read from a configuration service,
@@ -47,12 +46,12 @@ everything that might go wrong.
 
 This gap, between what a function's signature tells you
 and what the function actually does,
-turns out to be a fundamental problem.
-This problem shows up wherever programs get complex enough to matter.
+is a fundamental problem.
+This problem shows up when systems start to scale.
 
 ## The Leaky Abstraction
 
-Let's create a function that moves us in a direction at a velocity.
+Let's create a function to move us around.
 When calling `travel`, we provide direction and velocity:
 
 ```
@@ -74,8 +73,7 @@ def travel(d: Direction, v: Velocity): Distance = {
 }
 ```
 
-We constructed the implementation by using libraries.
-This is a powerful approach and it has gotten us far.
+Constructing code by using libraries is a powerful approach and it has gotten us far.
 
 There's a big problem when using libraries:
 This abstraction assumes there will be no repercussions from using `engine`,
@@ -94,7 +92,7 @@ Without a type system to handle the bookkeeping and ensure nothing slips through
 you can only keep track of what you can hold in your head.
 This challenge has limited the scale of large systems since we began building them.
 
-The main problem is that we sneak `engine` into `travel`.
+The main problem is that we *sneak* `engine` into `travel`.
 The function signature for `travel` doesn't show that we use the problematic `engine` in the implementation.
 We just use it directly in our code as if there are no consequences.
 
@@ -125,8 +123,11 @@ If `engine` itself requires other libraries,
 the dependency injector must include those and provide them for `engine` before providing `engine` to `travel`.
 Without somehow capturing that information in the type system, the dependency injector eventually succumbs to scaling problems.
 
-What if we create an additional channel to convey this information? This way, we can separate the information we typically provide at every function call (direction and velocity) from the information that normally stays the same across function calls. We still have the option to change the latter information from one function call to another, but we don't trip over it every time we call the function.
-It can be expressed like this:
+What if we create an additional way to convey this information?
+This separates the information we typically provide at every function call (direction and velocity) from the information that normally stays the same across function calls.
+We still have the option to change the latter information from one function call to another,
+but we don't trip over it every time we call the function.
+Here's one way to express it:
 
 ```
 def travel(d: Direction, v: Velocity): Distance \ engine = {
@@ -193,7 +194,7 @@ When programs are small, these are relatively manageable activites.
 As systems scale, these activities become increasingly challenging.
 A large portion of programming activity is consumed through managing Effects by hand.
 
-## Common Effects
+## Effect Taxonomy
 
 The most familiar Effect is **state**: reading or modifying a value outside the function's own scope.
 A method that increments a counter on its object has a state Effect.
@@ -205,10 +206,8 @@ and nothing in the function's signature mentions either.
 
 **I/O** covers interactions with the world beyond the program's own memory:
 writing to the console, reading from a file, sending a network request.
-These are slow compared to computation, they can fail for reasons outside your control,
-and they are often irreversible.
-You can reset a counter.
-You cannot un-send a request.
+These are slow compared to computation and they can fail for reasons outside your control.
+They are often irreversible: you can reset a counter, but you cannot un-send a request.
 
 **Exceptions** are not expressed in the type signature of the function.[^1]
 When a function throws, it does not return a value in the ordinary sense.
@@ -234,23 +233,23 @@ and that dependency is invisible from the outside.
 In particular, this makes testing difficult.
 
 Each type of Effect has different characteristics,
-but they share a common shape: something extra happens, beyond the return value.
+but they share a common shape: something extra happens apart from returning a result.
 That something is what a programmer needs to track, test around, and reason about.
-And in most languages, nothing makes it visible.
+In most languages, nothing makes it visible.
 
 ## Effects Are Not Optional
 
 The problem is not that Effects exist.
 The problem is what happens when they are invisible.
 
-On the first page of this chapter, we considered a test that failed intermittently.
+At the beginning of this chapter, we considered a test that failed intermittently.
 Look at the cost of the invisible Effects:
 
 - They made the test slow, because nothing indicated it needed a running service.
 - They made tests interfere with each other, because nothing indicated they shared state.
 - They required reading three levels of implementation to diagnose a simple failure.
 
-Every one of those costs came from the same source: the Effects were hidden.
+Each cost happens because the Effects are hidden.
 
 That cost amplifies.
 In a small codebase, you can hold enough context in your head to stay ahead of it.
@@ -272,12 +271,11 @@ When data must persist, it must be written somewhere.
 When two services must coordinate, they must communicate.
 Remove all Effects, and you have removed everything the program was built to do.
 
-When a program has explicit Effects, the programmer working on it,
-the test suite validating it, and the compiler processing it
-all know what each function does.
+When a program has explicit Effects, the programmer,
+the test suite, and the compiler all know what each function does.
 
 The challenge is making the compiler tell you, before you run anything,
-that a function you expected to be Effect-free is secretly reaching out to the network.
+that a function you expected to be Effect-free is actually Effectful.
 Now things formerly discoverable only by reading every line can instead be right there, in the type-checked interface.
 
 ## When Effect Systems Make Sense
