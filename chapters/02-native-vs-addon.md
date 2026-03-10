@@ -42,7 +42,7 @@ The angle brackets hold the **Effect row**: the set of Effects this function per
 `add` has an empty Effect row, so nothing appears there.
 `greet` performs console I/O, so `<console>` appears in its signature, and `()` indicates it returns nothing.
 
-Here is the same example in Flix:
+In Flix, function Effects appear after a backslash:
 
 ```flix
 // No Effects:
@@ -53,16 +53,13 @@ def greet(name: String): Unit \ IO =
     println("Hello, ${name}")
 ```
 
-Flix Effects appear after a backslash in function signatures
-rather than within angle brackets.
-
 The Effect information becomes part of the type.
-The caller sees that `greet` uses the `console` or `IO` Effect.
+In both languages, the caller sees that `greet` uses the `console` or `IO` Effect.
 
 With a native system, Effect annotations propagate automatically.
 If a function calls `greet`, the compiler adds `console` or `IO` to its own Effect row.
 The compiler infers the Effects from what you call.
-You can also annotate explicitly when you want to constrain what a function is allowed to do.
+You can also manually annotate explicitly when you want to constrain what a function is allowed to do.
 
 Effects must be fulfilled at some point.
 Something must decide what actually happens when a function signals a failure,
@@ -70,7 +67,7 @@ or asks for a configuration value, or uses the console.
 In a native system, that mechanism is the **handler**:
 a construct that intercepts an Effect and provides its implementation.
 
-Here is a custom Effect with a handler:
+Here is a custom Effect with a handler in Koka:
 
 ```koka
 // Declare a custom Effect that can fail:
@@ -125,16 +122,16 @@ Languages in this family include Koka, Eff, Effekt, Unison, and Flix.
 ## Addon Effect Systems
 
 It is not practical to require you to change languages to use Effects.
-If you've already committed to a language, you may not be able to switch.
+If you've already committed to a language, there are numerous reasons you might not be able to switch.
 
 To solve this problem, designers created *addon Effect systems*, implemented as libraries.
-In an existing language, the compiler doesn't track Effects,
-they used the existing type system to encode Effect information into the return type.
+In this approach, the compiler doesn't track Effects.
+Instead, an addon library uses the existing type system to encode Effect information into the return type.
 The approach requires a shift in mechanism:
 instead of writing a computation and having the compiler observe its Effects,
 you build a **description** of a computation and execute that description later.
 
-In the Scala ZIO library, that description is a value of type `ZIO[R, E, A]`.
+In the Scala ZIO library, that description is a return value of type `ZIO[R, E, A]`.
 The three type parameters carry the Effect information:
 `R` is the environment the computation requires,
 `E` is the type of error it can produce,
@@ -148,7 +145,7 @@ def safeDivide(x: Int, y: Int): ZIO[Any, Throwable, Int] =
   ZIO.attempt(x / y)
 ```
 
-Calling `safeDivide` doesn't execute the code — it returns a description, not a result.
+Calling `safeDivide` doesn't execute the code; it returns a description, not a result.
 
 Within a function, you compose descriptions using for-comprehensions.
 Here is Scala's syntax for chaining operations where each step can use the result of the previous one:
@@ -161,6 +158,8 @@ val program: ZIO[Any, Throwable, Unit] =
   yield ()
 ```
 
+<!-- Convert to direct notation -->
+
 `program` is also only a value, and defining it does not execute any code.
 
 Execution happens at a the runtime entry point:
@@ -170,17 +169,16 @@ object Main extends ZIOAppDefault:
   def run = program
 ```
 
-Sometimes we say that execution happens at the "edge".
-
 Everything above `run` is description.
 `run` is where description becomes action.
+Sometimes we say that execution happens at the "edge".
 
 This boundary is not incidental. It is the mechanism.
 The compiler sees what Effects a function might perform by looking at its return type,
 the same way it inspects any other type.
-But the Effects are encoded in a library type, not tracked natively by the language.
+The Effects are encoded in the type, not tracked natively by the language.
 
-Effect, a TypeScript library, uses the same approach.
+The TypeScript Effect library uses the same approach.
 Its description type is `Effect<Success, Error, Requirements>`.
 The type parameters carry Effect information in the same three roles,
 with different names.
@@ -191,12 +189,11 @@ const safeDivide = (x: number, y: number): Effect.Effect<number, Error> =>
   y === 0
     ? Effect.fail(new Error("division by zero"))
     : Effect.succeed(x / y)
-
 ```
 
-As before, nothing has run. `safeDivide` returns a description, not a result.
+`safeDivide` produces a description, not a result.
 
-Descriptions compose using generator syntax:
+In TypeScript Effect, descriptions compose with generator syntax:
 
 ```typescript
 const greet: Effect.Effect<void> = Effect.gen(function* () {
