@@ -4,8 +4,6 @@
 
 Download and install Zed from **zed.dev**.
 
-<!-- VERIFY: Zed Windows support status — as of mid-2025 it was in preview -->
-
 ---
 
 ## TypeScript / Effect.ts
