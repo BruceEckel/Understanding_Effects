@@ -1,0 +1,51 @@
+// Introductory effect example in Scala with ZIO.
+// Two effects: Ask and Tell.
+// The implementations (layers) in run are swappable without changing the logic.
+
+import zio._
+import zio.Console.{printLine, print => printNoNewline, readLine}
+
+
+// --- Service interfaces ---
+
+trait Ask:
+  def ask(prompt: String): UIO[String]
+
+trait Tell:
+  def tell(message: String): UIO[Unit]
+
+
+// --- Accessor methods (lift each service method into a ZIO) ---
+
+object Ask:
+  def ask(prompt: String): ZIO[Ask, Nothing, String] =
+    ZIO.serviceWithZIO[Ask](_.ask(prompt))
+
+object Tell:
+  def tell(message: String): ZIO[Tell, Nothing, Unit] =
+    ZIO.serviceWithZIO[Tell](_.tell(message))
+
+
+// --- Core logic (description — nothing runs yet) ---
+
+val greet: ZIO[Ask & Tell, Nothing, Unit] =
+  for
+    name <- Ask.ask("What is your name? ")
+    _    <- Tell.tell(s"Hello, $name!")
+  yield ()
+
+
+// --- Implementations ---
+
+val consoleAsk: ULayer[Ask] = ZLayer.succeed(new Ask:
+  def ask(prompt: String): UIO[String] =
+    printNoNewline(prompt).orDie *> readLine.orDie)
+
+val consoleTell: ULayer[Tell] = ZLayer.succeed(new Tell:
+  def tell(message: String): UIO[Unit] = printLine(message).orDie)
+
+
+// --- Entry point ---
+
+object Main extends ZIOAppDefault:
+  def run = greet.provide(consoleAsk, consoleTell)

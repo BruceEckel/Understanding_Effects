@@ -58,14 +58,14 @@ const ConsoleTell = Layer.succeed(Tell, {
 
 const ConsoleAsk = Layer.succeed(Ask, {
   ask: (prompt) =>
-    Effect.async<string>((resume) => {
+    Effect.async<string>((resolve) => {
       const rl = readline.createInterface({
         input:  process.stdin,
         output: process.stdout,
       })
       rl.question(prompt, (answer) => {
         rl.close()
-        resume(Effect.succeed(answer))
+        resolve(Effect.succeed(answer))
       })
     }),
 })

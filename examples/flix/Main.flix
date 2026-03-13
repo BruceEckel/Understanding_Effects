@@ -44,23 +44,23 @@ def main(): Unit \ IO =
             let id = inquire();
             greet(id)
         } with Ask {
-            def ask(prompt, k) =
+            def ask(prompt, resume) =
                 // VERIFY: Console.print vs print, Console.readLine vs readline
                 Console.print(prompt);
-                k(Console.readLine() |> Option.getWithDefault(""))
+                resume(Console.readLine() |> Option.getWithDefault(""))
         } with Tell {
-            def tell(message, k) =
+            def tell(message, resume) =
                 println(message);
-                k()
+                resume()
         } with Store {
-            def store(value, k) =
+            def store(value, resume) =
                 let c = deref counter + 1;
                 counter := c;
                 db := Map.insert(c, value, deref db);
-                k(c)
+                resume(c)
         } with Fetch {
-            def fetch(id, k) =
+            def fetch(id, resume) =
                 // VERIFY: Map.getWithDefault argument order
-                k(Map.getWithDefault(id, "", deref db))
+                resume(Map.getWithDefault(id, "", deref db))
         }
     }
