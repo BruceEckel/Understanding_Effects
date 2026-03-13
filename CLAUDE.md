@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Understanding Effects
 
 A three-chapter opening section for a book on effect systems in programming.
@@ -34,6 +38,39 @@ See `notes/outline.md` for the detailed chapter outline.
 - Push back on oversimplified framing
 - Use semantic line breaks in markdown source
 - No condescension toward the reader or toward any approach (add-on systems are not "worse," they have different tradeoffs)
+- Write in prose paragraphs — no bullet-point lists in body text
+- Reserve **bold** for terms being defined; use sparingly otherwise
+- Keep code blocks under 15 lines where possible
+
+### Sentence Style
+
+- Prefer periods over em-dashes — break compound thoughts into separate sentences
+- Split at "and": "slow, and sometimes X" → "slow. Sometimes X"
+- Avoid trailing relative clauses ("one that...", "something that...") — repeat the noun and start a new sentence
+- Bridge continuations ("and then X", "and trust that") become new sentences with an explicit subject
+- Cut redundant words aggressively
+
+### Vocabulary to Use
+
+| Term | Meaning |
+|------|---------|
+| **effect** | anything a function does beyond computing a return value |
+| **built-in effect system** | language where effects are tracked in the type system by design |
+| **add-on effect system** | library providing effect management on top of an existing language |
+| **handler** | the construct that determines how an effect is fulfilled |
+| **perform** | invoking an effect operation |
+| **artifact** | specifically for delayed execution: a byproduct of the mechanism, not intrinsic |
+| **direct style** | code that looks like normal sequential programming |
+| **description/execution split** | the mental model required by add-on systems |
+
+### Vocabulary to Avoid
+
+- **monad** — do not use in main text; footnote if absolutely necessary
+- **algebraic effects** — use "built-in" instead; footnote or "further reading" only
+- **functor**, **applicative** — unnecessary for this audience
+- **flatMap** — show in code examples but never make it a vocabulary word
+- **pure/impure** — prefer "effectful" vs "effect-free" (avoids moralistic connotation)
+- **referential transparency** — too formal; introduce the concept without the jargon
 
 ## File Layout
 
@@ -43,9 +80,17 @@ chapters/
   02-builtin-vs-addon.md
   03-what-your-effect-system-asks.md
 notes/
-  outline.md
-  style-decisions.md
+  outline.md            — detailed section-by-section chapter outline
+  style-decisions.md    — vocabulary guide and code example conventions
+resources/
+  DelayedExecution.md   — reference on why add-on systems require delayed execution
+  New Introduction.md   — draft alternative introduction material
+examples/
+  prompt.md             — spec for the four-language introductory example
+                          (Ask/Tell/Store/Fetch in Koka, Flix, Scala ZIO, Effect.ts)
 ```
+
+When unsure about Koka, Flix, ZIO, or Effect.ts syntax, add a `<!-- VERIFY: description of uncertainty -->` comment rather than guessing.
 
 ## Workflow
 
