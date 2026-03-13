@@ -1,4 +1,4 @@
-// Introductory effect example in Koka.
+// Welcome effect example in Koka.
 // Two effects: Ask and Tell.
 // The implementations (handlers) in main are swappable without changing the logic.
 

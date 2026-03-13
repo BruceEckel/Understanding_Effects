@@ -1,4 +1,4 @@
-// Introductory effect example in Flix.
+// Welcome effect example in Flix.
 // Two effects: Ask and Tell.
 // The implementations (handlers) in main are swappable without changing the logic.
 

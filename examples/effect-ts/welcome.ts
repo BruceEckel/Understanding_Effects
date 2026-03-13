@@ -1,4 +1,4 @@
-// Introductory effect example in TypeScript with Effect.ts.
+// Welcome effect example in TypeScript with Effect.ts.
 // Two effects: Ask and Tell.
 // The implementations (layers) in runPromise are swappable without changing the logic.
 

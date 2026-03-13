@@ -1,4 +1,4 @@
-// Introductory effect example in Flix.
+// Session effect example in Flix.
 // Four effects: Ask, Tell, Store, Fetch.
 // The implementations (handlers) in main are swappable without changing the logic.
 

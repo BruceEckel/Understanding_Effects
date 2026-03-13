@@ -1,4 +1,4 @@
-// Introductory effect example in Scala with ZIO.
+// Session effect example in Scala with ZIO.
 // Four effects: Ask, Tell, Store, Fetch.
 // The implementations (layers) in run are swappable without changing the logic.
 

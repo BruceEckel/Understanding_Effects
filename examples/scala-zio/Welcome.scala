@@ -1,4 +1,4 @@
-// Introductory effect example in Scala with ZIO.
+// Welcome effect example in Scala with ZIO.
 // Two effects: Ask and Tell.
 // The implementations (layers) in run are swappable without changing the logic.
 

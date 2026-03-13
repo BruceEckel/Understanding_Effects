@@ -1,4 +1,4 @@
-// Introductory effect example in TypeScript with Effect.ts.
+// Session effect example in TypeScript with Effect.ts.
 // Four effects: Ask, Tell, Store, Fetch.
 // The implementations (layers) in runPromise are swappable without changing the logic.
 
