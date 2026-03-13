@@ -91,3 +91,56 @@ object Main extends ZIOAppDefault:
     inquire
       .flatMap(greet)
       .provide(consoleTell, consoleAsk, memoryLayer)
+
+
+// =============================================================================
+// WHAT'S NEW IN THIS EXAMPLE
+// =============================================================================
+//
+// TWO LOGIC FUNCTIONS WITH DIFFERENT SIGNATURES
+//
+//   val inquire: ZIO[Ask & Tell & Store, Nothing, Int]
+//   def greet(id: Int): ZIO[Fetch & Tell, Nothing, Unit]
+//
+// `inquire` is a value (no parameters); `greet` is a function that takes an
+// Int. Both are ZIO descriptions. Each declares only its own environmental
+// requirements — neither knows about the other's services.
+//
+//
+// MUTABLE REFERENCES WITH Ref
+//
+//   db      <- Ref.make(Map.empty[Int, String])
+//   counter <- Ref.make(0)
+//
+// `Ref.make(initial)` creates a ZIO-managed mutable reference. Unlike a Scala
+// `var`, a `Ref` is safe in concurrent code because ZIO controls all access.
+//
+//   counter.updateAndGet(_ + 1)      // atomically increment, return new value
+//   db.update(_ + (id -> value))     // atomically add a key-value pair to the map
+//   db.get.map(_.getOrElse(id, ""))  // read, then transform the result
+//
+// `_ + (id -> value)` is shorthand for `map => map + (id -> value)` — adding
+// an entry to an immutable Map and returning the updated copy.
+//
+//
+// BUILDING A LAYER WITH INITIALIZATION
+//
+//   val memoryLayer: ULayer[Store & Fetch] = ZLayer.fromZIO(
+//     for ... yield (new Store with Fetch { ... }: Store & Fetch)
+//   )
+//
+// `ZLayer.fromZIO` builds a layer from a ZIO effect — useful when the layer
+// itself needs to perform initialization (here: allocating Refs). The inner
+// `for`/`yield` creates the Refs, then yields a single object implementing
+// both Store and Fetch. `new Store with Fetch { ... }` is Scala's syntax for
+// an anonymous class that mixes in multiple traits. Both services share the
+// same Refs, which is why they are built together.
+//
+//
+// CHAINING TWO PROGRAMS
+//
+//   inquire.flatMap(greet)
+//
+// `.flatMap(f)` runs `inquire`, takes its result (the Int id), and passes it
+// to `greet`. This is equivalent to writing the same thing as a
+// for-comprehension but expressed directly.

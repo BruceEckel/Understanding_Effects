@@ -107,3 +107,70 @@ const program = Effect.gen(function* () {
 Effect.runPromise(
   program.pipe(Effect.provide(Layer.mergeAll(ConsoleTell, ConsoleAsk, MemoryLayer))),
 )
+
+
+// =============================================================================
+// WHAT'S NEW IN THIS EXAMPLE
+// =============================================================================
+//
+// TWO SEPARATE EFFECT.GEN FUNCTIONS
+//
+//   const inquire = Effect.gen(function* () { ... })
+//   const greet = (id: number) => Effect.gen(function* () { ... })
+//
+// `inquire` is a plain Effect value. `greet` is a function that returns an
+// Effect — it takes the id produced by `inquire` and uses it to fetch the
+// name. Each resolves only the services it needs.
+//
+//
+// MUTABLE REFERENCES WITH Ref
+//
+//   const db      = yield* Ref.make(new Map<number, string>())
+//   const counter = yield* Ref.make(0)
+//
+// `Ref.make(initial)` creates an Effect-managed mutable reference. All reads
+// and writes are themselves effects, so the runtime controls all access.
+//
+//   yield* Ref.updateAndGet(counter, (n) => n + 1)
+//     // atomically increment counter, return new value
+//
+//   yield* Ref.update(db, (map) => new Map([...map, [id, value]]))
+//     // atomically add an entry to the map
+//
+//   Ref.get(db).pipe(Effect.map((map) => map.get(id) ?? ""))
+//     // read the map, then transform the result; ?? "" supplies a default
+//
+//
+// BUILDING A LAYER WITH INITIALIZATION
+//
+//   const MemoryLayer: Layer.Layer<Store | Fetch> = Layer.unwrapEffect(
+//     Effect.gen(function* () {
+//       ...
+//       return Layer.merge(storeLayer, fetchLayer)
+//     })
+//   )
+//
+// `Layer.unwrapEffect` takes an Effect that produces a Layer and flattens it
+// into a Layer. This is how you build layers that need initialization (here:
+// allocating Refs). The inner Effect.gen creates the Refs and constructs two
+// inner layers that close over them; `Layer.merge` combines Store and Fetch
+// since they share the same Refs.
+//
+//
+// SEQUENCING AT THE TOP LEVEL
+//
+//   const program = Effect.gen(function* () {
+//     const id = yield* inquire
+//     yield* greet(id)
+//   })
+//
+// A top-level `program` generator sequences `inquire` and `greet`. The id
+// returned by `inquire` is passed directly to `greet(id)`.
+//
+//
+// PROVIDING ALL LAYERS AT ONCE
+//
+//   program.pipe(Effect.provide(Layer.mergeAll(ConsoleTell, ConsoleAsk, MemoryLayer)))
+//
+// `Layer.mergeAll` combines three or more layers in one call, rather than
+// nesting `Layer.merge` calls.

@@ -56,3 +56,42 @@ const ConsoleTell = Layer.succeed(Tell, {
 Effect.runPromise(
   greet.pipe(Effect.provide(Layer.merge(ConsoleAsk, ConsoleTell))),
 )
+
+
+// =============================================================================
+// WHAT'S NEW IN THIS EXAMPLE
+// =============================================================================
+//
+// RESOLVING MULTIPLE SERVICES
+//
+//   const ask  = yield* Ask
+//   const tell = yield* Tell
+//
+// Each `yield* Tag` resolves one service from the environment. With two
+// services, both are resolved at the start of the generator before they
+// are used. The order of resolution does not matter.
+//
+//
+// COMBINING LAYERS
+//
+//   greet.pipe(Effect.provide(Layer.merge(ConsoleAsk, ConsoleTell)))
+//
+// `Layer.merge` combines two layers so both services are available when the
+// effect runs.
+//
+//
+// WRAPPING CALLBACK-BASED ASYNC
+//
+//   Effect.async<string>((resolve) => {
+//     const rl = readline.createInterface({ ... })
+//     rl.question(prompt, (answer) => {
+//       rl.close()
+//       resolve(Effect.succeed(answer))
+//     })
+//   })
+//
+// `Effect.async` bridges callback-based APIs into the Effect world. The
+// outer function receives a `resolve` callback. When the async operation
+// completes (here: when the user presses Enter), call
+// `resolve(Effect.succeed(value))` to deliver the result back into the
+// Effect runtime. Until `resolve` is called, the Effect is suspended.

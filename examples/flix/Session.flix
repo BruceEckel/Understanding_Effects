@@ -64,3 +64,51 @@ def main(): Unit \ IO =
                 resume(Map.getWithDefault(id, "", deref db))
         }
     }
+
+
+// =============================================================================
+// WHAT'S NEW IN THIS EXAMPLE
+// =============================================================================
+//
+// EFFECTS WITH NON-UNIT RETURN TYPES
+//
+//   pub def store(value: String): Int32
+//   pub def fetch(id: Int32): String
+//
+// `store` returns an Int32 (the storage ID) and `fetch` returns a String.
+// Correspondingly, the handlers call `resume(c)` and `resume(string)` rather
+// than `resume()`, passing the result back to the caller. Whatever is passed
+// to `resume` is what the `Store.store(...)` or `Fetch.fetch(...)` call
+// evaluates to in the core logic.
+//
+//
+// REGION-SCOPED MUTABLE STATE
+//
+//   region rc {
+//       let db      = Ref.fresh(rc, Map.empty());
+//       let counter = Ref.fresh(rc, 0);
+//       ...
+//   }
+//
+// `region rc { ... }` creates a lexically scoped region for mutable memory.
+// `Ref.fresh(rc, initial)` allocates a mutable reference in that region.
+// Mutable state cannot escape the region; this gives the compiler and reader
+// a clear boundary on where mutation can occur.
+//
+//
+// READING AND WRITING REFS
+//
+//   let c = deref counter + 1;
+//   counter := c;
+//   db := Map.insert(c, value, deref db);
+//
+// `deref ref` reads the current value. `ref := value` writes a new value.
+// `Map.insert(key, value, map)` returns a new map with the entry added;
+// the result is written back into `db`.
+//
+//
+// MAP LOOKUP WITH DEFAULT
+//
+//   Map.getWithDefault(id, "", deref db)
+//
+// Looks up `id` in the map. If the key is absent, returns the default `""`.
