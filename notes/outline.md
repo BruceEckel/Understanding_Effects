@@ -28,20 +28,20 @@
 - What would it mean for a language to help us manage them?
 
 
-## Chapter 2: Effect Systems — Built-in vs Add-on
+## Chapter 2: Effect Systems — Native vs Library
 
 ### Two Paths to the Same Problem
 - Different languages have taken fundamentally different approaches
 - The split is historical and practical, not theoretical
 
-### Built-in Effect Systems
+### Native Effect Systems
 - The language tracks effects in the type system alongside ordinary types
 - Direct-style code: you write normal-looking sequential programs
 - The compiler knows which effects a function performs
 - Pseudocode examples in Koka: declaring and handling effects
 - Languages in this family: Koka, Eff, Effekt, Unison, Flix
 
-### Add-on Effect Systems
+### Library Effect Systems
 - Languages not originally designed around effects
 - Libraries provide effect management on top of existing type systems
 - The key mechanism: constructing descriptions of programs, not executing them directly
@@ -66,13 +66,13 @@
 - The two approaches change it in different ways
 - Understanding the tradeoffs lets you choose wisely
 
-### The Built-in Experience
+### The Native Experience
 - Declaring effects on functions — an extension of what you already do with types
 - Performing effects: looks like a function call, acts like a function call
 - Writing handlers: similar to catch blocks, but generalized
 - Mental model: "perform and handle" — close to how you think about exceptions
 
-### The Add-on Experience
+### The Library Experience
 - A different mental model: description then execution
 - Building programs as values — nothing runs until you say so
 - Composing descriptions with combinators
@@ -80,8 +80,8 @@
 
 ### Delayed Execution: An Artifact, Not a Feature
 - Delayed execution is not intrinsic to effect management
-- It emerged as a byproduct of the add-on mechanism
-- Built-in systems prove the separation of concerns is achievable without it
+- It emerged as a byproduct of the library mechanism
+- Native systems prove the separation of concerns is achievable without it
 - The cost: a conceptual layer the programmer must internalize and manage
 
 ### Living with Each Approach
@@ -92,6 +92,6 @@
 - API design: how each approach shapes the interfaces you write
 
 ### Choosing Your Tradeoffs
-- Add-on systems: enormous ecosystem investment, battle-tested runtimes, broad adoption
-- Built-in systems: conceptual elegance, lower cognitive overhead, direct-style clarity
+- Library systems: enormous ecosystem investment, battle-tested runtimes, broad adoption
+- Native systems: conceptual elegance, lower cognitive overhead, direct-style clarity
 - The reader should leave equipped to evaluate either approach for their own context

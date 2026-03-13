@@ -15,19 +15,19 @@ Mainstream programmers (Java, Python, TypeScript background) who have never enco
 Three chapters in a section titled "Understanding Effects":
 
 1. **A Gentle Introduction to Effects** — What effects are, why they matter, no code
-2. **Effect Systems: Built-in vs Add-on** — Two families of solution and how they arose
+2. **Effect Systems: Native vs Library** — Two families of solution and how they arose
 3. **What Your Effect System Asks of You** — Programmer-facing consequences and tradeoffs
 
 See `notes/outline.md` for the detailed chapter outline.
 
 ## Key Decisions
 
-- Use "built-in" and "add-on" instead of "algebraic" and "monadic"
-- Delayed execution is framed as an **artifact** of the add-on approach, not intrinsic to effect management
-- Avoid the word "monad" — show the shape of add-on systems without naming the underlying abstraction
+- Use "native" and "library" instead of "algebraic" and "monadic"
+- Delayed execution is framed as an **artifact** of the library approach, not intrinsic to effect management
+- Avoid the word "monad" — show the shape of library systems without naming the underlying abstraction
 - Chapter 1 has no code — purely conceptual, grounded in problems the reader already feels
-- Built-in examples use **Koka** and **Flix** syntax (both purpose-built around effects, different notations)
-- Add-on examples use **Scala/ZIO** and **Effect.ts** real syntax, showing the pattern without naming monads
+- Native examples use **Koka** and **Flix** syntax (both purpose-built around effects, different notations)
+- Library examples use **Scala/ZIO** and **Effect.ts** real syntax, showing the pattern without naming monads
 - Chapter 1 must establish why mainstream programmers should care, in terms they already feel — not "effects are a formal concept" but "you've been bitten by this problem"
 
 ## Writing Style
@@ -37,7 +37,7 @@ See `notes/outline.md` for the detailed chapter outline.
 - Technically precise but never academic
 - Push back on oversimplified framing
 - Use semantic line breaks in markdown source
-- No condescension toward the reader or toward any approach (add-on systems are not "worse," they have different tradeoffs)
+- No condescension toward the reader or toward any approach (library systems are not "worse," they have different tradeoffs)
 - Write in prose paragraphs — no bullet-point lists in body text
 - Reserve **bold** for terms being defined; use sparingly otherwise
 - Keep code blocks under 15 lines where possible
@@ -55,18 +55,18 @@ See `notes/outline.md` for the detailed chapter outline.
 | Term | Meaning |
 |------|---------|
 | **effect** | anything a function does beyond computing a return value |
-| **built-in effect system** | language where effects are tracked in the type system by design |
-| **add-on effect system** | library providing effect management on top of an existing language |
+| **native effect system** | language where effects are tracked in the type system by design |
+| **library effect system** | library providing effect management on top of an existing language |
 | **handler** | the construct that determines how an effect is fulfilled |
 | **perform** | invoking an effect operation |
 | **artifact** | specifically for delayed execution: a byproduct of the mechanism, not intrinsic |
 | **direct style** | code that looks like normal sequential programming |
-| **description/execution split** | the mental model required by add-on systems |
+| **description/execution split** | the mental model required by library systems |
 
 ### Vocabulary to Avoid
 
 - **monad** — do not use in main text; footnote if absolutely necessary
-- **algebraic effects** — use "built-in" instead; footnote or "further reading" only
+- **algebraic effects** — use "native" instead; footnote or "further reading" only
 - **functor**, **applicative** — unnecessary for this audience
 - **flatMap** — show in code examples but never make it a vocabulary word
 - **pure/impure** — prefer "effectful" vs "effect-free" (avoids moralistic connotation)
@@ -77,13 +77,13 @@ See `notes/outline.md` for the detailed chapter outline.
 ```
 chapters/
   01-gentle-introduction.md
-  02-builtin-vs-addon.md
+  02-native-vs-library.md
   03-what-your-effect-system-asks.md
 notes/
   outline.md            — detailed section-by-section chapter outline
   style-decisions.md    — vocabulary guide and code example conventions
 resources/
-  DelayedExecution.md   — reference on why add-on systems require delayed execution
+  DelayedExecution.md   — reference on why library systems require delayed execution
   New Introduction.md   — draft alternative introduction material
 examples/
   prompt.md             — spec for the four-language introductory example

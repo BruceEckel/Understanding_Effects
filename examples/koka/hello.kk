@@ -76,6 +76,6 @@ fun main() : console ()
 //
 //   fun main() : console ()
 //
-// `console` is a built-in Koka effect covering standard I/O. `println` is a
+// `console` is a native Koka effect covering standard I/O. `println` is a
 // console operation, so `main` carries the `console` effect in its type. The
 // `tell` effect is handled inside `main` and no longer appears in the row.

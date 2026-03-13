@@ -51,7 +51,7 @@ Create `examples/effect-ts/tsconfig.json`:
 
 ### 4. VS Code setup
 
-VS Code has built-in TypeScript support. Open the `examples/effect-ts` folder in VS Code.
+VS Code has native TypeScript support. Open the `examples/effect-ts` folder in VS Code.
 Type checking activates automatically once `node_modules` is present.
 
 ### 5. Run an example

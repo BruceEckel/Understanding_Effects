@@ -88,4 +88,4 @@ def main(): Unit \ IO =
 //
 // After the handler is installed, the Tell effect is handled and no longer
 // appears in `main`'s type. But `println` is an IO operation, so `main`
-// carries `IO` — Flix's built-in effect for console and file I/O.
+// carries `IO` — Flix's native effect for console and file I/O.

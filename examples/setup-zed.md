@@ -51,7 +51,7 @@ Create `examples/effect-ts/tsconfig.json`:
 
 ### 4. Zed setup
 
-Zed has built-in TypeScript support. Open the `examples/effect-ts` folder in Zed.
+Zed has native TypeScript support. Open the `examples/effect-ts` folder in Zed.
 Type checking activates automatically once `node_modules` is present.
 
 ### 5. Run an example

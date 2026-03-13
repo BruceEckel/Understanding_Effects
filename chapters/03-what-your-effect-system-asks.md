@@ -10,7 +10,7 @@ Once that habit forms, the system mostly stays out of your way.
 The compiler's enforcement is present,
 but the code looks like code.
 
-An addon Effect system asks for something more fundamental:
+A library Effect system asks for something more fundamental:
 a different mental model for what running a program means.
 Instead of writing computations that execute,
 you write descriptions of computations that will be executed.
@@ -117,7 +117,7 @@ The names differ; the structure does not.
 
 ## The Addon Experience
 
-The addon mental model has one foundational rule, and everything follows from it:
+The library mental model has one foundational rule, and everything follows from it:
 a value is not a running computation. It is a description of one.
 
 When you write `ZIO.attempt(readLine())`, nothing reads a line.
@@ -212,7 +212,7 @@ is the description/execution split essential to Effect management?
 The answer is no.
 
 Native systems achieve everything without delayed execution.
-Delayed execution exists in addon systems because of how those systems are built,
+Delayed execution exists in library systems because of how those systems are built,
 not because Effect management requires it.
 To make Effects visible in a language not designed for them,
 the library encodes Effect information into return types.
@@ -236,12 +236,12 @@ You must always know whether a value is a description or an action.
 You must know that descriptions compose but do not run.
 You must know where the boundary is,
 and that nothing outside it constitutes execution.
-When you are deep in a large codebase built on an addon system,
+When you are deep in a large codebase built on a library system,
 that layer is always present.
 
 Native systems show that the layer is not required by the problem.
 Knowing that helps you understand the tradeoff clearly.
-An addon system does not use delayed execution
+A library system does not use delayed execution
 because it is the natural way to manage Effects.
 It is the cost of a library-based solution
 in a language not built for Effects from the start.
@@ -260,7 +260,7 @@ There is nothing to declare beyond what the compiler already infers.
 Two functions with different Effects can be called together, and
 the combined row is their union.
 
-In an addon system, composition is managed explicitly through the type parameters.
+In a library system, composition is managed explicitly through the type parameters.
 Adding a new Effect means extending `R` with an additional service requirement
 or widening `E` with an additional error case.
 The type system enforces that you have accounted for every Effect,
@@ -275,7 +275,7 @@ A function that runs under a real-database handler in production
 runs under an in-memory handler in tests.
 The function's code does not change.
 
-In an addon system, you swap the layer.
+In a library system, you swap the layer.
 A function that requires a database service through its `R` parameter
 receives a real implementation in production and a test implementation in tests.
 
@@ -325,7 +325,7 @@ If you call an Effect operation without a handler, the compiler points to the ca
 If you annotate a function as Effect-free and it calls something Effectful, the error is there.
 The information is in the types and the types are close to the code.
 
-addon systems can surface type errors at a distance from their source.
+library systems can surface type errors at a distance from their source.
 A mismatch in a composed `ZIO` type often appears where the descriptions are combined,
 not where the problem was introduced.
 Reading a type error involving multiple stacked `R` and `E` parameters
@@ -339,7 +339,7 @@ Effect operations look like function calls.
 Handlers resemble catch blocks.
 The new concepts build on familiar ones.
 
-The addon learning curve requires a different kind of adjustment.
+The library learning curve requires a different kind of adjustment.
 The individual pieces are learnable: the `ZIO` type, for-comprehensions, layers.
 What takes time is the mental model itself.
 Understanding that you are building descriptions, not executing code,
@@ -352,7 +352,7 @@ In a native system, Effects are part of a function's signature alongside its typ
 A function that might fail and logs to console says so in its Effect row.
 Callers know what to expect and what to handle.
 
-In an addon system, the return type is the interface.
+In a library system, the return type is the interface.
 `ZIO[DatabaseService, QueryError, User]` tells a caller
 what the function needs, what can go wrong, and what it produces on success.
 Designing those type parameters well is its own craft:
@@ -363,7 +363,7 @@ specific enough to be informative, general enough not to overconstrain the calle
 In practice, context decides more than principles do.
 A team already working in Scala or TypeScript is not choosing between Effect systems in the abstract.
 It is choosing which library to adopt in an ecosystem that already exists,
-where the addon model is the established path.
+where the library model is the established path.
 A team with more flexibility might weigh native systems seriously,
 knowing that the conceptual overhead is lower
 even if the ecosystem is still maturing.

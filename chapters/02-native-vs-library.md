@@ -1,18 +1,18 @@
-# Effect Systems: Native vs Addon
+# Effect Systems: Native vs Library
 
 Ideally, Effects are directly supported by the language; we'll call this a *native* Effect System.
-It's also possible to implement an Effect System as an addon library for an existing language,
+It's also possible to implement an Effect System as a library for an existing language,
 as long as that language has a type system.
 
 These two approaches produce different programming experiences.
 Programs written in a native Effect system look like ordinary sequential code.
 Effect information lives in type signatures, tracked by the compiler.
-Programs written for an addon Effect system work differently:
+Programs written for a library Effect system work differently:
 you construct descriptions of what a program should do, then execute those descriptions.
 
 You'll have a better programming experience with a native Effect system.
 However, it's highly likely that you don't have the flexibility to change languages,
-in which case an addon Effect system allows you to use Effects with your language of choice.
+in which case a library Effect system allows you to use Effects with your language of choice.
 
 ## Native Effect Systems
 
@@ -119,14 +119,14 @@ The compiler ensures that all Effects have handlers.
 
 Languages in this family include Koka, Eff, Effekt, Unison, and Flix.
 
-## Addon Effect Systems
+## Library Effect Systems
 
 It is not practical to require you to change languages to use Effects.
 If you've already committed to a language, there are numerous reasons you might not be able to switch.
 
-To solve this problem, designers created *addon Effect systems*, implemented as libraries.
+To solve this problem, designers created *library Effect systems*, implemented as libraries.
 In this approach, the compiler doesn't track Effects.
-Instead, an addon library uses the existing type system to encode Effect information into the return type.
+Instead, a library uses the existing type system to encode Effect information into the return type.
 The approach requires a shift in mechanism:
 instead of writing a computation and having the compiler observe its Effects,
 you build a **description** of a computation and execute that description later.
@@ -212,7 +212,7 @@ Effect.runSync(greet)
 
 <!-- VERIFY: Effect.ts type parameter order (Effect<A, E, R>), generator yield* syntax, Effect.sync for wrapping synchronous side Effects, runSync vs runPromise -->
 
-Addon libraries require this description/execution split.
+Library systems require this description/execution split.
 The library controls execution; everything above the boundary is description.
 
 Libraries in this family include ZIO, Cats Effect, and Kyo in Scala;
@@ -223,7 +223,7 @@ polysemy and Effectful in Haskell; and Effect in TypeScript.
 The two approaches look different from the outside and work differently on the inside.
 But both make Effects visible.
 In a native system, the Effect row in a function's signature tells you what that function does.
-In an addon system, Effects are packaged into the return type.
+In a library system, Effects are packaged into the return type.
 The result is the same: Effects you can see without reading the body.
 
 Both separate the declaration of Effects from their implementation.
@@ -236,7 +236,7 @@ Neither the function nor the description owns the implementation of its own Effe
 
 Both let the compiler or runtime enforce Effect discipline.
 In a native system, the compiler rejects code that uses an unhandled Effect.
-In an addon system, the type system rejects code that runs a description
+In a library system, the type system rejects code that runs a description
 with unsatisfied dependencies or unresolved error types.
 The enforcement looks different, but the principle is the same:
 you cannot ignore Effects.

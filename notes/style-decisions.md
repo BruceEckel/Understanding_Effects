@@ -4,19 +4,19 @@
 
 ### Use These Terms
 - **effect** — anything a function does beyond computing a return value
-- **built-in effect system** — a language where effects are tracked in the type system by design (replaces "algebraic effects" for the reader)
-- **add-on effect system** — a library that provides effect management on top of an existing language (replaces "monadic effects" for the reader)
+- **native effect system** — a language where effects are tracked in the type system by design (replaces "algebraic effects" for the reader)
+- **library effect system** — a library that provides effect management on top of an existing language (replaces "monadic effects" for the reader)
 - **handler** — the construct that determines how an effect is fulfilled
 - **perform** — invoking an effect operation (Koka uses this naturally)
-- **artifact** — specifically for delayed execution: a byproduct of the add-on mechanism, not intrinsic to effect management
+- **artifact** — specifically for delayed execution: a byproduct of the library mechanism, not intrinsic to effect management
 - **direct style** — code that looks like normal sequential programming
-- **description/execution split** — the mental model required by add-on systems
+- **description/execution split** — the mental model required by library systems
 
 ### Avoid These Terms (or Use With Care)
 - **monad** — do not use in the main text; if absolutely necessary, footnote it for readers who want to look it up
-- **algebraic effects** — use "built-in" instead; can appear in a footnote or "for further reading"
+- **algebraic effects** — use "native" instead; can appear in a footnote or "for further reading"
 - **functor**, **applicative** — unnecessary for this audience
-- **flatMap** — show it in add-on code examples but don't make it a vocabulary word; describe what it does without naming the abstraction
+- **flatMap** — show it in library code examples but don't make it a vocabulary word; describe what it does without naming the abstraction
 - **pure/impure** — use sparingly; prefer "effectful" vs "effect-free" to avoid the moralistic connotation
 - **referential transparency** — too formal for Chapter 1; introduce the concept without the jargon
 
@@ -26,20 +26,20 @@
 - No code at all
 - Use plain-language descriptions and familiar analogies
 
-### Chapter 2 — Built-in Examples
+### Chapter 2 — Native Examples
 - Use **Koka** as primary, **Flix** as secondary (same concept, different notation)
 - Keep examples short and focused on one concept each
 - Annotate with comments explaining what the effect annotations mean
 - Show the progression: function without effects → function with declared effects → handler
 
-### Chapter 2 — Add-on Examples
+### Chapter 2 — Library Examples
 - Use **Scala with ZIO** as primary, **TypeScript with Effect** as secondary
 - Show the shape of the code without explaining the monadic machinery
 - Focus on what the programmer sees: for-comprehensions/generators, the description type signature, the runtime boundary
 - Let the reader notice the description/execution split without being lectured about it
 
 ### Chapter 3
-- Use Koka and Flix for built-in, Scala/ZIO and Effect.ts for add-on
+- Use Koka and Flix for native, Scala/ZIO and Effect.ts for library
 - Side by side where the contrast matters; keep examples parallel
 
 ## Tone
