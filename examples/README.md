@@ -137,4 +137,4 @@ and have not been confirmed against current language/library versions:
 - `flix/Session.flix` — `Map.getWithDefault` argument order
 - `scala-zio/Session.scala` — `Tag[Store & Fetch]` derivation with ZIO 2 / izumi-reflect under Scala 3
 - `effect-ts/session.ts` — `Layer.unwrapEffect` signature in current Effect.ts version
-- `setup-zed.md`, `setup-vscode.md` — Zed Windows support status; Koka and Flix extension availability in both marketplaces; current Scala 3, ZIO 2, and sbt versions; minimum JDK version for Flix; tsconfig settings for current Effect.ts
+- `setup-zed.md`, `setup-vscode.md` — Koka and Flix extension availability in both marketplaces; current Scala 3, ZIO 2, and sbt versions; minimum JDK version for Flix; tsconfig settings for current Effect.ts
