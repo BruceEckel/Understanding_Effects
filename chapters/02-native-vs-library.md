@@ -57,7 +57,7 @@ The Effect information becomes part of the type.
 In both languages, the caller sees that `greet` uses the `console` or `IO` Effect.
 
 With a native system, Effect annotations propagate automatically.
-If a function calls `greet`, the compiler adds `console` or `IO` to its own Effect row.
+If a function calls `greet`, the compiler adds `console` or `IO` to that function's Effect row.
 The compiler infers the Effects from what you call.
 You can also manually annotate explicitly when you want to constrain what a function is allowed to do.
 
