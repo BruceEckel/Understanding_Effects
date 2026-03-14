@@ -11,7 +11,7 @@ Programs written for a library Effect system work differently:
 you construct descriptions of what a program should do, then execute those descriptions.
 
 You'll have a better programming experience with a native Effect system.
-However, it's highly likely that you don't have the flexibility to change languages,
+However, you might not have the flexibility to change languages,
 in which case a library Effect system allows you to use Effects with your language of choice.
 
 ## Native Effect Systems
@@ -38,7 +38,7 @@ fun greet(name: string): <console> ()
   println("Hello, " ++ name)
 ```
 
-The angle brackets hold the **Effect row**: the set of Effects this function performs.
+The angle brackets hold the *Effect row*: the set of Effects this function performs.
 `add` has an empty Effect row, so nothing appears there.
 `greet` performs console I/O, so `<console>` appears in its signature, and `()` indicates it returns nothing.
 
@@ -64,7 +64,7 @@ You can also manually annotate explicitly when you want to constrain what a func
 Effects must be fulfilled at some point.
 Something must decide what actually happens when a function signals a failure,
 or asks for a configuration value, or uses the console.
-In a native system, that mechanism is the **handler**:
+In a native system, that mechanism is the *handler*:
 a construct that intercepts an Effect and provides its implementation.
 
 Here is a custom Effect with a handler in Koka:
@@ -129,7 +129,7 @@ In this approach, the compiler doesn't track Effects.
 Instead, a library uses the existing type system to encode Effect information into the return type.
 The approach requires a shift in mechanism:
 instead of writing a computation and having the compiler observe its Effects,
-you build a **description** of a computation and execute that description later.
+you build a *description* of a computation and execute that description later.
 
 In the Scala ZIO library, that description is a return value of type `ZIO[R, E, A]`.
 The three type parameters carry the Effect information:
